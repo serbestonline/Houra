@@ -5,8 +5,8 @@
 <h1 align="center">Houra</h1>
 
 <p align="center">
-  <b>macOS menü çubuğu için sakin, siyah-beyaz bir odak zamanlayıcısı.</b><br>
-  Oturumu planla, açıkta çalış, mola gelince ekrandan uzaklaş.
+  <b>macOS için sakin, siyah-beyaz bir odak zamanlayıcısı.</b><br>
+  Oturumu planla, süreyi göz önünde tut, mola gelince ekrandan uzaklaş.
 </p>
 
 <p align="center">

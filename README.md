@@ -5,8 +5,8 @@
 <h1 align="center">Houra</h1>
 
 <p align="center">
-  <b>A calm, black-and-white focus timer for the macOS menu bar.</b><br>
-  Plan the session, work in the open, and get pulled away from the screen when the break comes.
+  <b>A calm, black-and-white focus timer for macOS.</b><br>
+  Plan the session, keep the time in sight, and step away from the screen when the break comes.
 </p>
 
 <p align="center">
