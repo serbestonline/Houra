@@ -10,6 +10,7 @@ struct Topic: Identifiable, Equatable {
     var color: String
     var emoji: String?
     var icon: String?
+    var iconColor: String? = nil    // boşsa kategori rengine göre siyah ya da beyaz
 }
 
 enum TodoState: Int { case waiting = 0, doing = 1, done = 2
@@ -80,6 +81,9 @@ final class Store {
         CREATE INDEX IF NOT EXISTS todos_day ON todos(day);
         CREATE INDEX IF NOT EXISTS sessions_start ON sessions(start);
         """)
+        var columns: [String] = []
+        query("PRAGMA table_info(categories)") { columns.append(str($0, 1)) }
+        if !columns.contains("icon_color") { exec("ALTER TABLE categories ADD COLUMN icon_color TEXT") }
         if categories().isEmpty {
             addCategory(name: T("Genel", "General"), color: "#4c8df0")
         }
@@ -93,8 +97,8 @@ final class Store {
 
     func categories() -> [Topic] {
         var out: [Topic] = []
-        query("SELECT id, name, color, emoji, icon FROM categories ORDER BY position, id") { s in
-            out.append(Topic(id: col(s, 0), name: str(s, 1), color: str(s, 2), emoji: optStr(s, 3), icon: optStr(s, 4)))
+        query("SELECT id, name, color, emoji, icon, icon_color FROM categories ORDER BY position, id") { s in
+            out.append(Topic(id: col(s, 0), name: str(s, 1), color: str(s, 2), emoji: optStr(s, 3), icon: optStr(s, 4), iconColor: optStr(s, 5)))
         }
         return out
     }
@@ -108,8 +112,8 @@ final class Store {
     }
 
     func updateCategory(_ c: Topic) {
-        run("UPDATE categories SET name = ?, color = ?, emoji = ?, icon = ? WHERE id = ?",
-            [.text(c.name), .text(c.color), .optText(c.emoji), .optText(c.icon), .int(c.id)])
+        run("UPDATE categories SET name = ?, color = ?, emoji = ?, icon = ?, icon_color = ? WHERE id = ?",
+            [.text(c.name), .text(c.color), .optText(c.emoji), .optText(c.icon), .optText(c.iconColor), .int(c.id)])
         changed()
     }
 

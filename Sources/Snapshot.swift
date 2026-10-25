@@ -56,6 +56,12 @@ enum Snapshot {
             if let p = pop.first, let w = panelWindow() { composite([w, p], canvas: w.frame.insetBy(dx: -1, dy: -1), desktop: false).map { write($0, to: "\(dir)/categories-picker.png") } }
             NotificationCenter.default.post(name: .pickerCommand, object: nil, userInfo: ["close": true])
         }))
+        steps.append((0.6, { NotificationCenter.default.post(name: .pickerCommand, object: nil, userInfo: ["tab": 0]) }))
+        steps.append((0.8, {
+            let pop = NSApp.windows.filter { $0.isVisible && $0.className.contains("Popover") }
+            if let p = pop.first, let w = panelWindow() { composite([w, p], canvas: w.frame.insetBy(dx: -1, dy: -1), desktop: false).map { write($0, to: "\(dir)/categories-colour.png") } }
+            NotificationCenter.default.post(name: .pickerCommand, object: nil, userInfo: ["close": true])
+        }))
         steps.append((0.4, { NewSessionController.prefillGoal = T("Brief'i incele", "Review the brief"); NewSessionController.shared.show() }))
         steps.append((0.9, { capture(sheetWindow(), to: "\(dir)/new-session.png") }))
         run(steps) { NSApp.terminate(nil) }

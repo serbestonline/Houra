@@ -198,6 +198,7 @@ private struct TodayPage: View {
                     StatCard(title: T("Acil durum", "Emergency"), value: "\(sessions.filter(\.emergency).count)", detail: T("moladan erken dönüş", "early returns from a break"))
                 }
                 HStack(alignment: .top, spacing: 14) {
+                    VStack(spacing: 14) {
                     Card {
                         VStack(alignment: .leading, spacing: 0) {
                             HStack {
@@ -217,6 +218,8 @@ private struct TodayPage: View {
                             UnderlineField(placeholder: T("Açıklama (isteğe bağlı) · Enter ile ekle", "Details (optional) · Enter to add"), text: $detail, size: 12, onSubmit: add)
                         }
                     }
+                    if WeeklyList.isOn { WeekCard(topics: Array(topics.values)) }
+                    }
                     Card {
                         VStack(alignment: .leading, spacing: 16) {
                             Eyebrow(T("Gün akışı", "Day flow"))
@@ -226,9 +229,11 @@ private struct TodayPage: View {
                                 DayColumn(sessions: sessions, topics: topics)
                             }
                         }
+                        .frame(maxHeight: .infinity, alignment: .top)
                     }
+                    .frame(width: 380)
                 }
-                if WeeklyList.isOn { WeekCard(topics: Array(topics.values)) }
+                .fixedSize(horizontal: false, vertical: true)   // gün akışı sol sütunun boyunca uzasın
             }
             .padding(36)
         }
@@ -258,7 +263,7 @@ private struct WeekCard: View {
                     Text(fileName.isEmpty ? T("haftalık not bulunamadı", "weekly note not found") : "\(fileName) · \(T("\(tasks.count) açık görev", "\(tasks.count) open tasks"))")
                         .font(.system(size: 12)).foregroundStyle(Ink.muted)
                 }
-                LazyVGrid(columns: [GridItem(.flexible(), spacing: 22, alignment: .top), GridItem(.flexible(), alignment: .top)], alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: 20) {
                     ForEach(groups, id: \.heading) { group in
                         VStack(alignment: .leading, spacing: 4) {
                             HStack(spacing: 8) {
@@ -570,7 +575,6 @@ private struct SymbolPicker: View {
     let topic: Topic
     @State private var tab = SymbolPicker.startTab
     @State private var query = ""
-    @State private var custom = Color.white
     @State private var typed = ""
 
     private let emojis = "🎬 🎥 ✍️ 📝 📚 📖 🎓 🧠 🔬 🧪 🧬 💡 🎯 🚀 💼 🤝 📈 📊 💰 🏦 🛒 🏠 🚗 ✈️ 🏋️ 🏃 🧘 🕌 🤲 ☕ 🍳 🎮 🎸 🎧 🎨 📷 💻 ⌨️ 🖥️ 📱 🌍 🗣️ 📞 ✉️ 🗓️ ⏰ 🔥 ⭐ ❤️ 🌱 🐾 👶".split(separator: " ").map(String.init)
@@ -594,20 +598,10 @@ private struct SymbolPicker: View {
         VStack(alignment: .leading, spacing: 10) {
             LazyVGrid(columns: Array(repeating: GridItem(.fixed(26), spacing: 10), count: 8), spacing: 10) {
                 ForEach(palette, id: \.self) { hex in
-                    Button { update { $0.color = hex } } label: {
-                        Circle().fill(Color(hex: hex)).frame(width: 22, height: 22)
-                            .overlay(Circle().strokeBorder(Color.white.opacity(0.12)))
-                            .padding(2)
-                            .overlay(Circle().strokeBorder(Color.white.opacity(hex == topic.color ? 0.85 : 0), lineWidth: 1.5))
-                    }
+                    Button { update { $0.color = hex } } label: { ColourDot(hex: hex, selected: hex == topic.color) }
                     .buttonStyle(.plain)
                 }
-                ColorPicker("", selection: $custom, supportsOpacity: false).labelsHidden().frame(width: 26, height: 26)
-                    .onChange(of: custom) { c in
-                        guard let rgb = NSColor(c).usingColorSpace(.sRGB) else { return }
-                        let hex = String(format: "#%02x%02x%02x", Int(rgb.redComponent * 255), Int(rgb.greenComponent * 255), Int(rgb.blueComponent * 255))
-                        update { $0.color = hex }
-                    }
+                CustomColorButton(current: topic.color, isCustom: !palette.contains(topic.color)) { hex in update { $0.color = hex } }
             }
             Text(topic.color.uppercased()).font(.system(size: 11)).foregroundStyle(Ink.faint).monospacedDigit()
         }
@@ -633,6 +627,20 @@ private struct SymbolPicker: View {
                 if n.isEmpty { Text("∅").font(.system(size: 17)).foregroundStyle(Ink.muted) }
                 else if let shape = IconShape(name: n) { shape.fill(Color.white.opacity(0.85)).frame(width: 18, height: 18) }
             } choose: { n in update { $0.icon = n.isEmpty ? nil : n; $0.emoji = nil } }
+            HStack(spacing: 8) {
+                Eyebrow(T("İkon rengi", "Icon colour"))
+                Spacer()
+                CategorySwatch(category: topic, size: 22)
+            }
+            .padding(.top, 4)
+            LazyVGrid(columns: Array(repeating: GridItem(.fixed(26), spacing: 10), count: 8), spacing: 10) {
+                ForEach(Self.inkColours, id: \.self) { hex in
+                    Button { update { $0.iconColor = hex } } label: { ColourDot(hex: hex, selected: hex == topic.iconColor) }.buttonStyle(.plain)
+                }
+                CustomColorButton(current: topic.iconColor ?? "#ffffff", isCustom: topic.iconColor.map { !Self.inkColours.contains($0) } ?? false) { hex in
+                    update { $0.iconColor = hex }
+                }
+            }
             Text(T("Phosphor ikonları · MIT lisansı", "Phosphor icons · MIT licence")).font(.system(size: 10.5)).foregroundStyle(Ink.faint)
         }
     }
@@ -651,13 +659,63 @@ private struct SymbolPicker: View {
                 }
             }
         }
-        .frame(height: 230)
+        .frame(height: tab == 2 ? 170 : 230)
     }
+
+    private static let inkColours = ["#ffffff", "#000000"] + palette.filter { $0 != "#e9e9ee" && $0 != "#3a3f4d" }
 
     private func update(_ change: (inout Topic) -> Void) {
         var t = Store.shared.categories().first { $0.id == topic.id } ?? topic
         change(&t)
         Store.shared.updateCategory(t)
+    }
+}
+
+private struct ColourDot: View {
+    let hex: String, selected: Bool
+    var body: some View {
+        Circle().fill(Color(hex: hex)).frame(width: 22, height: 22)
+            .overlay(Circle().strokeBorder(Color.white.opacity(0.12)))
+            .padding(2)
+            .overlay(Circle().strokeBorder(Color.white.opacity(selected ? 0.85 : 0), lineWidth: 1.5))
+    }
+}
+
+/// Paletin sonundaki gökkuşağı daire: sistemin renk panelini açar.
+private struct CustomColorButton: View {
+    let current: String, isCustom: Bool
+    let pick: (String) -> Void
+    var body: some View {
+        Button { ColorPanelBridge.shared.open(current, onPick: pick) } label: {
+            Circle().fill(AngularGradient(colors: [.red, .yellow, .green, .cyan, .blue, .purple, .red], center: .center))
+                .frame(width: 22, height: 22)
+                .overlay(Circle().fill(isCustom ? Color(hex: current) : .clear).padding(5))
+                .padding(2)
+                .overlay(Circle().strokeBorder(Color.white.opacity(isCustom ? 0.85 : 0), lineWidth: 1.5))
+        }
+        .buttonStyle(.plain)
+        .help(T("Özel renk", "Custom colour"))
+    }
+}
+
+final class ColorPanelBridge: NSObject {
+    static let shared = ColorPanelBridge()
+    private var onPick: ((String) -> Void)?
+
+    func open(_ hex: String, onPick: @escaping (String) -> Void) {
+        let panel = NSColorPanel.shared
+        self.onPick = nil
+        panel.showsAlpha = false
+        panel.color = NSColor(hex: hex)
+        self.onPick = onPick
+        panel.setTarget(self)
+        panel.setAction(#selector(changed(_:)))
+        panel.orderFront(nil)
+    }
+
+    @objc private func changed(_ panel: NSColorPanel) {
+        guard let rgb = panel.color.usingColorSpace(.sRGB) else { return }
+        onPick?(String(format: "#%02x%02x%02x", Int(rgb.redComponent * 255), Int(rgb.greenComponent * 255), Int(rgb.blueComponent * 255)))
     }
 }
 

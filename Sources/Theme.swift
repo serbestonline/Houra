@@ -133,7 +133,7 @@ struct CategorySwatch: View {
                 if let emoji = category.emoji, !emoji.isEmpty {
                     Text(emoji).font(.system(size: size * 0.6))
                 } else if let icon = category.icon, let shape = IconShape(name: icon) {
-                    shape.fill(inkOn(category.color)).frame(width: size * 0.6, height: size * 0.6)
+                    shape.fill(category.iconColor.map { Color(hex: $0) } ?? inkOn(category.color)).frame(width: size * 0.6, height: size * 0.6)
                 }
             }
     }
