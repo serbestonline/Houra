@@ -38,7 +38,7 @@ Oturumu menü çubuğundan, panelden ya da her yerden **⌥⌘N** ile başlatır
 - **Kategori:** her kategorinin bir rengi ve istersen bir emojisi ya da 100 hazır ikondan biri vardır.
 - **Hedef:** *Neye odaklanıyorsun?* sorusuna birkaç kelimeyle cevap verirsin.
 - **Görevler:** bugünün listesinden seçersin ya da başlık ve isteğe bağlı açıklamayla yenisini yazarsın. Yeni görevler bugünün listesine de eklenir.
-- **Haftanın listesi:** haftanı bir Markdown dosyasında, örneğin Obsidian'daki haftalık notunda planlıyorsan Houra oradaki açık görevleri okur, onlardan da seçebilirsin. Seçili kategorinin görevleri üstte gelir. Yolu *Ayarlar › Haftalık görevler*'de verirsin; yıl, hafta ve ay (`{YYYY}`, `{WW}`, `{MM}`) ile herhangi bir klasör için `*` içerebilir, böylece hafta dönünce kendiliğinden yeni dosyaya geçer. Dosya yalnız okunur, hiçbir şey yazılmaz.
+- **Haftanın listesi:** haftanı bir Markdown dosyasında, örneğin Obsidian'daki haftalık notunda planlıyorsan Houra oradaki açık görevleri okur, onlardan da seçebilirsin. Seçili kategorinin görevleri üstte gelir, alt görevler üst görevlerinin altında girintili durur. *Ayarlar › Haftalık görevler*'de açıp yolu verirsin; yıl, hafta ve ay (`{YYYY}`, `{WW}`, `{MM}`) ile herhangi bir klasör için `*` içerebilir, böylece hafta dönünce kendiliğinden yeni dosyaya geçer. Dosya yalnız okunur, hiçbir şey yazılmaz.
 - **Ritim:** iki sabit ritim: **25 + 5** ve **50 + 10**.
 
 Oturum sırasında her görevin üç durumu vardır, tıklayarak değişir:
@@ -112,7 +112,7 @@ Houra'da rengin kullanıldığı tek yer burası; kategoriler böylece öne çı
   <img src="assets/panel-sessions.png" width="49%" alt="Oturumlar sayfası">
 </p>
 
-- **Bugün:** bugünün odağı, molaları, görevleri ve acil durumları; günün yapılacaklar listesi; oturumların dikey çizelgesi.
+- **Bugün:** bugünün odağı, molaları, görevleri ve acil durumları; günün yapılacaklar listesi; oturumların dikey çizelgesi; haftalık görevler açıksa haftalık notundaki açık görevleri proje proje gösteren *Bu hafta* kartı. Bir göreve tıklayınca o görevle oturum açılır.
 - **Oturumlar:** gün gün geçmiş; kategoriye ya da notlu oturumlara göre süzülür. Oturuma tıklayınca görevleri ve notları açılır.
 
 <p align="center">
@@ -120,8 +120,8 @@ Houra'da rengin kullanıldığı tek yer burası; kategoriler böylece öne çı
   <img src="assets/panel-settings.png" width="49%" alt="Ayarlar">
 </p>
 
-- **Kategoriler:** adı yerinde değiştirirsin. Kareye tıklayınca renk (ya da istediğin özel renk), emoji ya da Türkçe ve İngilizce aranabilen 100 [Phosphor](https://phosphoricons.com) ikonundan birini seçersin. İkon, rengin açıklığına göre kendiliğinden siyah ya da beyaz olur.
-- **Ayarlar:** dil (sistem, Türkçe, English), ekrandaki görünüm, açılışta başlatma ve veriler.
+- **Kategoriler:** adı yerinde değiştirirsin. Kareye tıklayınca renk (ya da istediğin özel renk), emoji ya da Türkçe ve İngilizce aranabilen 100 [Phosphor](https://phosphoricons.com) ikonundan birini seçersin. İkonun rengini de hazır renklerden ya da istediğin özel bir renkten seçersin; seçmezsen kategori renginin açıklığına göre siyah ya da beyaz olur.
+- **Ayarlar:** dil (sistem, Türkçe, English), ekrandaki görünüm, açılışta başlatma, haftalık görevleri açıp kapatma ve veriler.
 
 ### Menü çubuğu
 

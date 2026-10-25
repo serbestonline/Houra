@@ -6,7 +6,7 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-VERSION="1.0"
+VERSION="1.1"
 BUILD_NUMBER="1"
 MIN_MACOS="13.0"
 APP="build/Houra.app"

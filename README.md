@@ -50,7 +50,7 @@ Start a session from the menu bar, from the panel, or from anywhere with **⌥�
 - **Category:** each category has its own colour and, optionally, an emoji or one of 100 built-in icons.
 - **Goal:** answer *What are you focusing on?* in a few words.
 - **Tasks:** tick tasks from today's list, or write new ones with a title and optional details. New tasks are added to today's list too.
-- **This week's list:** if you plan your week in a Markdown file, for example a weekly note in Obsidian, Houra reads its open tasks and lets you pick them too. Tasks of the selected category come first. Set the path in *Settings › Weekly tasks*; it can contain the year, week and month (`{YYYY}`, `{WW}`, `{MM}`) and `*` for any folder, so it follows you into next week by itself. The file is only read, never written.
+- **This week's list:** if you plan your week in a Markdown file, for example a weekly note in Obsidian, Houra reads its open tasks and lets you pick them too. Tasks of the selected category come first, and subtasks sit indented under their parent. Turn it on and set the path in *Settings › Weekly tasks*; it can contain the year, week and month (`{YYYY}`, `{WW}`, `{MM}`) and `*` for any folder, so it follows you into next week by itself. The file is only read, never written.
 - **Rhythm:** two fixed rhythms, **25 + 5** and **50 + 10**. No fiddling with minutes.
 
 During the session every task has three states, cycled with a click:
@@ -124,7 +124,7 @@ This is the only place in Houra that uses colour, so your categories stand out.
   <img src="assets/panel-sessions.png" width="49%" alt="Sessions page">
 </p>
 
-- **Today:** today's focus, breaks, tasks and emergency exits; today's to-do list; and a vertical timeline of your sessions.
+- **Today:** today's focus, breaks, tasks and emergency exits; today's to-do list; a vertical timeline of your sessions; and, if weekly tasks are on, a *This week* card with the open tasks of your weekly note grouped by project. Click one to start a session with it.
 - **Sessions:** your history grouped by day, filterable by category or *with notes*. Click a session to see its tasks and notes.
 
 <p align="center">
@@ -132,8 +132,8 @@ This is the only place in Houra that uses colour, so your categories stand out.
   <img src="assets/panel-settings.png" width="49%" alt="Settings">
 </p>
 
-- **Categories:** rename a category in place. Click its square to pick a colour (or any custom colour), an emoji, or one of 100 [Phosphor](https://phosphoricons.com) icons, searchable in English and Turkish. Icons switch between black and white automatically, based on how light the colour is.
-- **Settings:** language (system, Türkçe, English), on-screen view, launch at login, and your data.
+- **Categories:** rename a category in place. Click its square to pick a colour (or any custom colour), an emoji, or one of 100 [Phosphor](https://phosphoricons.com) icons, searchable in English and Turkish. Pick the icon's own colour too, from the presets or any custom colour; left unset, it switches between black and white based on how light the category colour is.
+- **Settings:** language (system, Türkçe, English), on-screen view, launch at login, weekly tasks on or off, and your data.
 
 ### Menu bar
 

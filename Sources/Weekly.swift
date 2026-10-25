@@ -29,7 +29,13 @@ enum WeeklyList {
         set { UserDefaults.standard.set(newValue, forKey: "weeklyTemplate") }
     }
 
-    static var isOn: Bool { !template.trimmingCharacters(in: .whitespaces).isEmpty }
+    /// Ayarlardaki anahtar; kapatınca yol silinmez, yalnız okunmaz.
+    static var enabled: Bool {
+        get { UserDefaults.standard.object(forKey: "weeklyOn") as? Bool ?? true }
+        set { UserDefaults.standard.set(newValue, forKey: "weeklyOn") }
+    }
+
+    static var isOn: Bool { enabled && !template.trimmingCharacters(in: .whitespaces).isEmpty }
 
     /// Şablonu verilen tarihe göre çözer ve var olan dosyayı bulur. Birden fazla eşleşme varsa en son değişeni.
     static func file(for date: Date = Date(), template: String = WeeklyList.template) -> URL? {

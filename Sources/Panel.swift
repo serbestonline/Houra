@@ -728,6 +728,7 @@ private struct SettingsPage: View {
     @State private var style = Widgets.shared.style
     @State private var login = SMAppService.mainApp.status == .enabled
     @State private var weeklyTemplate = WeeklyList.template
+    @State private var weeklyOn = WeeklyList.enabled
     private static let examplePattern = "AA Daily/* - {YYYY}/Hafta {WW}/Hafta {WW} - Yapılacaklar.md"
 
     var body: some View {
@@ -760,19 +761,24 @@ private struct SettingsPage: View {
                 }
                 Card {
                     VStack(alignment: .leading, spacing: 10) {
-                        Eyebrow(T("Haftalık görevler", "Weekly tasks"))
-                        Text(T("Obsidian'daki haftalık notun gibi bir Markdown dosyasındaki açık görevler yeni oturum penceresinde \"Haftanın listesi\" olarak görünür. Dosya yalnız okunur. Yol her açılışta bugünün tarihiyle çözülür: {YYYY} yıl, {WW} hafta, {MM} ay, * herhangi bir klasör.",
-                               "Open tasks from a Markdown file, such as your weekly note in Obsidian, show up as \"This week's list\" in the new session window. The file is only read. The path is resolved with today's date every time: {YYYY} year, {WW} week, {MM} month, * any folder."))
+                        HStack {
+                            Text(T("Haftalık görevler", "Weekly tasks")).font(.system(size: 14))
+                            Spacer()
+                            Toggle("", isOn: $weeklyOn).labelsHidden().toggleStyle(.switch)
+                                .onChange(of: weeklyOn) { WeeklyList.enabled = $0 }
+                        }
+                        Text(T("Obsidian'daki haftalık notun gibi bir Markdown dosyasındaki açık görevler Bugün sayfasında \"Bu hafta\" kartında ve yeni oturum penceresinde \"Haftanın listesi\" olarak görünür. Dosya yalnız okunur. Yol her açılışta bugünün tarihiyle çözülür: {YYYY} yıl, {WW} hafta, {MM} ay, * herhangi bir klasör.",
+                               "Open tasks from a Markdown file, such as your weekly note in Obsidian, show up in a \"This week\" card on the Today page and as \"This week's list\" in the new session window. The file is only read. The path is resolved with today's date every time: {YYYY} year, {WW} week, {MM} month, * any folder."))
                             .font(.system(size: 13)).foregroundStyle(Ink.muted)
+                        VStack(alignment: .leading, spacing: 10) {
                         UnderlineField(placeholder: "~/Obsidian/Vault/" + Self.examplePattern, text: $weeklyTemplate, size: 12)
                             .onChange(of: weeklyTemplate) { WeeklyList.template = $0 }
                         HStack(spacing: 8) {
                             Button(T("Kasa klasörünü seç…", "Choose vault folder…"), action: chooseVault).buttonStyle(SecondaryButtonStyle()).frame(width: 200)
-                            if !weeklyTemplate.isEmpty {
-                                Button(T("Kapat", "Turn off")) { weeklyTemplate = "" }.buttonStyle(SecondaryButtonStyle()).frame(width: 90)
-                            }
                         }
                         Text(weeklyStatus).font(.system(size: 12)).foregroundStyle(Ink.faint)
+                        }
+                        .disabled(!weeklyOn).opacity(weeklyOn ? 1 : 0.4)
                     }
                 }
                 Card {
@@ -797,7 +803,8 @@ private struct SettingsPage: View {
     }
 
     private var weeklyStatus: String {
-        guard !weeklyTemplate.trimmingCharacters(in: .whitespaces).isEmpty else { return T("Kapalı.", "Off.") }
+        guard weeklyOn else { return T("Kapalı. Yol saklanır, açınca kaldığı yerden okunur.", "Off. The path is kept for when you turn it back on.") }
+        guard !weeklyTemplate.trimmingCharacters(in: .whitespaces).isEmpty else { return T("Yol verilmedi.", "No path set.") }
         guard let file = WeeklyList.file(template: weeklyTemplate) else { return T("Bu haftanın dosyası bulunamadı.", "This week's file wasn't found.") }
         let n = (try? String(contentsOf: file, encoding: .utf8)).map { WeeklyList.parse($0, topics: Store.shared.categories()).count } ?? 0
         return T("Bu hafta: \(file.lastPathComponent) · \(n) açık görev", "This week: \(file.lastPathComponent) · \(n) open tasks")
