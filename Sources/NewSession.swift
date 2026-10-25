@@ -9,7 +9,11 @@ final class NewSessionController {
     static var prefillGoal = ""
     private var window: NSWindow?
 
-    func show() {
+    /// Bugün sayfasında tıklanan haftalık görev: pencere onu seçili ve kategorisi ayarlı açılır.
+    static var preselect: WeeklyTask?
+
+    func show(preselect: WeeklyTask? = nil) {
+        Self.preselect = preselect
         if Focus.shared.phase == .rest { Focus.shared.endRest(emergency: false); return }   // endRest yeniden çağırır
         window?.close()
         let w = KeyWindow(contentRect: NSRect(x: 0, y: 0, width: 540, height: 700), styleMask: [.borderless], backing: .buffered, defer: false)
@@ -40,13 +44,13 @@ private struct NewSessionView: View {
     let close: () -> Void
 
     @State private var topics = Store.shared.categories()
-    @State private var topicID: Int64? = UserDefaults.standard.object(forKey: "lastTopic") as? Int64
+    @State private var topicID: Int64? = NewSessionController.preselect?.topicID ?? UserDefaults.standard.object(forKey: "lastTopic") as? Int64
     @State private var goal = NewSessionController.prefillGoal
     @State private var waiting = Store.shared.todos(day: dayKey(Date())).filter { $0.state != .done && $0.sessionID == nil }
     @State private var picked: [Int64] = []
     @State private var weekly = WeeklyList.load(topics: Store.shared.categories())
-    @State private var pickedWeekly: [Int] = []
-    @State private var source = 0     // 0 bugünün listesi, 1 haftanın listesi
+    @State private var pickedWeekly: [Int] = NewSessionController.preselect.map { [$0.id] } ?? []
+    @State private var source = NewSessionController.preselect == nil ? 0 : 1     // 0 bugünün listesi, 1 haftanın listesi
     @State private var extra: [(String, String)] = []
     @State private var newTitle = ""
     @State private var newDetail = ""
@@ -102,11 +106,17 @@ private struct NewSessionView: View {
                                 }
                             }
                         } else {
-                            ForEach(weeklySorted) { task in
-                                PickRow(title: task.title, detail: task.detail, selected: pickedWeekly.contains(task.id),
+                            let list = weeklySorted
+                            ForEach(Array(list.enumerated()), id: \.element.id) { i, task in
+                                if WeeklyTask.startsSubgroup(list, at: i) {
+                                    Text(task.detail).font(.system(size: 12)).foregroundStyle(Ink.faint).lineLimit(1)
+                                        .frame(maxWidth: .infinity, alignment: .leading).padding(.leading, 42).padding(.top, 6)
+                                }
+                                PickRow(title: task.title, detail: task.depth > 0 ? "" : task.detail, selected: pickedWeekly.contains(task.id),
                                         topic: task.topicID.flatMap { id in topics.first { $0.id == id } }, waiting: task.waiting) {
                                     if let i = pickedWeekly.firstIndex(of: task.id) { pickedWeekly.remove(at: i) } else { pickedWeekly.append(task.id) }
                                 }
+                                .padding(.leading, task.depth > 0 ? 28 : 0)
                             }
                         }
                         ForEach(Array(extra.enumerated()), id: \.offset) { i, item in

@@ -12,6 +12,15 @@ struct WeeklyTask: Identifiable, Equatable {
     let heading: String       // altında durduğu ##### başlığı
     let topicID: Int64?
     let waiting: Bool         // [w] bekleniyor
+    var depth = 0             // 0 ana görev, 1 alt görev
+
+    /// Alt görev, üst görevi hemen üstünde listelenmiyorsa üst görevin adı ayrı bir satırda gösterilir.
+    static func startsSubgroup(_ list: [WeeklyTask], at i: Int) -> Bool {
+        guard list[i].depth > 0 else { return false }
+        guard i > 0 else { return true }
+        let prev = list[i - 1]
+        return prev.depth == 0 ? prev.title != list[i].detail : prev.detail != list[i].detail
+    }
 }
 
 enum WeeklyList {
@@ -84,7 +93,8 @@ enum WeeklyList {
             guard state == " " || state == "w" || state == "/", !rest.contains("→ Hafta"), !title.isEmpty else { continue }
             let tag = rest.split(separator: " ").first { $0.hasPrefix("#") }.map { String($0.dropFirst()) }
             out.append(WeeklyTask(id: n, title: title, detail: indent > 0 ? (parent?.title ?? "") : "",
-                                  heading: heading, topicID: match(heading: heading, tag: tag, topics: topics), waiting: state == "w"))
+                                  heading: heading, topicID: match(heading: heading, tag: tag, topics: topics), waiting: state == "w",
+                                  depth: indent > 0 ? 1 : 0))
         }
         return out
     }

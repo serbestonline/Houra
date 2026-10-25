@@ -33,6 +33,7 @@ if CommandLine.arguments.contains("--selftest") {
     let week = WeeklyList.parse(note, topics: topicsNow)
     precondition(week.map(\.title) == ["Siteyi gez", "Sunum", "Bekleyen Ali"], "haftalık ayrıştırma: \(week.map(\.title))")
     precondition(week[1].detail == "1.0" && week[1].topicID == 99 && week[2].waiting, "haftalık ayrıntılar")
+    precondition(week.map(\.depth) == [0, 1, 0] && !WeeklyTask.startsSubgroup(week, at: 0) && WeeklyTask.startsSubgroup(week, at: 1), "alt görev")
     precondition(lightness("#000000") < 1 && lightness("#ffffff") > 99, "açıklık")
     print("selftest: tamam")
     exit(0)

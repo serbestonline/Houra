@@ -228,6 +228,7 @@ private struct TodayPage: View {
                         }
                     }
                 }
+                if WeeklyList.isOn { WeekCard(topics: Array(topics.values)) }
             }
             .padding(36)
         }
@@ -238,6 +239,91 @@ private struct TodayPage: View {
         guard !t.isEmpty else { return }
         Store.shared.addTodo(day: dayKey(Date()), title: t, detail: detail.trimmingCharacters(in: .whitespaces))
         title = ""; detail = ""
+    }
+}
+
+/// Haftalık nottaki açık görevler, proje proje. Bir göreve tıklayınca o görev seçili yeni oturum açılır.
+private struct WeekCard: View {
+    let topics: [Topic]
+    @State private var tasks: [WeeklyTask] = []
+    @State private var fileName = ""
+    private let refresh = Timer.publish(every: 20, on: .main, in: .common).autoconnect()   // Obsidian'daki değişiklikler gelsin
+
+    var body: some View {
+        Card {
+            VStack(alignment: .leading, spacing: 14) {
+                HStack {
+                    Eyebrow(T("Bu hafta", "This week"))
+                    Spacer()
+                    Text(fileName.isEmpty ? T("haftalık not bulunamadı", "weekly note not found") : "\(fileName) · \(T("\(tasks.count) açık görev", "\(tasks.count) open tasks"))")
+                        .font(.system(size: 12)).foregroundStyle(Ink.muted)
+                }
+                LazyVGrid(columns: [GridItem(.flexible(), spacing: 22, alignment: .top), GridItem(.flexible(), alignment: .top)], alignment: .leading, spacing: 20) {
+                    ForEach(groups, id: \.heading) { group in
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack(spacing: 8) {
+                                if let t = group.topic { CategorySwatch(category: t, size: 16) }
+                                Text(group.heading).font(.system(size: 13, weight: .semibold))
+                                Text("\(group.tasks.count)").font(.system(size: 12)).foregroundStyle(Ink.faint)
+                            }
+                            .padding(.bottom, 4)
+                            ForEach(Array(group.tasks.enumerated()), id: \.element.id) { i, task in
+                                if WeeklyTask.startsSubgroup(group.tasks, at: i) {
+                                    Text(task.detail).font(.system(size: 12)).foregroundStyle(Ink.faint).lineLimit(1)
+                                        .padding(.leading, 26).padding(.top, 4)
+                                }
+                                WeekTaskRow(task: task).padding(.leading, task.depth > 0 ? 20 : 0)
+                            }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .topLeading)
+                    }
+                }
+            }
+        }
+        .onAppear(perform: load)
+        .onReceive(refresh) { _ in load() }
+    }
+
+    private var groups: [(heading: String, topic: Topic?, tasks: [WeeklyTask])] {
+        var order: [String] = [], byHeading: [String: [WeeklyTask]] = [:]
+        for t in tasks {
+            let h = t.heading.isEmpty ? T("Diğer", "Other") : t.heading
+            if byHeading[h] == nil { order.append(h) }
+            byHeading[h, default: []].append(t)
+        }
+        return order.map { h in (h, byHeading[h]?.first?.topicID.flatMap { id in topics.first { $0.id == id } }, byHeading[h] ?? []) }
+    }
+
+    private func load() {
+        tasks = WeeklyList.load(topics: topics)
+        fileName = WeeklyList.file()?.deletingPathExtension().lastPathComponent ?? ""
+    }
+}
+
+private struct WeekTaskRow: View {
+    let task: WeeklyTask
+    @State private var hovering = false
+    var body: some View {
+        Button { NewSessionController.shared.show(preselect: task) } label: {
+            HStack(alignment: .top, spacing: 8) {
+                Circle().strokeBorder(Color.white.opacity(task.waiting ? 0.25 : 0.4), style: StrokeStyle(lineWidth: 1, dash: task.waiting ? [2, 2] : []))
+                    .frame(width: 12, height: 12).padding(.top, 3)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(task.title).font(.system(size: 13)).foregroundStyle(task.waiting ? Ink.muted : Ink.text).lineLimit(2)
+                    if task.waiting {
+                        Text(T("bekleniyor", "waiting")).font(.system(size: 11)).foregroundStyle(Ink.faint)
+                    }
+                }
+                Spacer(minLength: 4)
+                Image(systemName: "play.fill").font(.system(size: 9)).foregroundStyle(Ink.muted).opacity(hovering ? 1 : 0).padding(.top, 4)
+            }
+            .padding(.vertical, 5).padding(.horizontal, 6)
+            .background(RoundedRectangle(cornerRadius: 8).fill(Color.white.opacity(hovering ? 0.05 : 0)))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering = $0 }
+        .help(T("Bu görevle oturum başlat", "Start a session with this task"))
     }
 }
 
