@@ -190,14 +190,15 @@ private struct TodayPage: View {
             VStack(alignment: .leading, spacing: 14) {
                 PageHeader(eyebrow: T("Bugün", "Today") + " · " + formatDate(Date(), "dMMMMEEEE"),
                            title: T("\(formatMinutes(focusMin)) odak", "\(formatMinutes(focusMin)) focused")) { EmptyView() }
-                HStack(spacing: 14) {
+                Grid(horizontalSpacing: 14, verticalSpacing: 14) {   // alt satır üstteki dört kartın sütunlarına otursun
+                GridRow {
                     StatCard(title: T("Oturum", "Sessions"), value: "\(sessions.count)",
                              detail: T("\(sessions.filter { $0.workMinutes == 50 }.count) tanesi 50 + 10", "\(sessions.filter { $0.workMinutes == 50 }.count) of them 50 + 10"))
                     StatCard(title: T("Mola", "Breaks"), value: formatMinutes(restMin), detail: T("\(sessions.count) mola", "\(sessions.count) breaks"))
                     StatCard(title: T("Görev", "Tasks"), value: "\(todos.filter { $0.state == .done }.count) / \(todos.count)", detail: T("tamamlandı 🥳", "done 🥳"))
                     StatCard(title: T("Acil durum", "Emergency"), value: "\(sessions.filter(\.emergency).count)", detail: T("moladan erken dönüş", "early returns from a break"))
                 }
-                HStack(alignment: .top, spacing: 14) {
+                GridRow(alignment: .top) {
                     VStack(spacing: 14) {
                     Card {
                         VStack(alignment: .leading, spacing: 0) {
@@ -220,6 +221,7 @@ private struct TodayPage: View {
                     }
                     if WeeklyList.isOn { WeekCard(topics: Array(topics.values)) }
                     }
+                    .gridCellColumns(3)
                     Card {
                         VStack(alignment: .leading, spacing: 16) {
                             Eyebrow(T("Gün akışı", "Day flow"))
@@ -229,11 +231,10 @@ private struct TodayPage: View {
                                 DayColumn(sessions: sessions, topics: topics)
                             }
                         }
-                        .frame(maxHeight: .infinity, alignment: .top)
+                        .frame(maxHeight: .infinity, alignment: .top)   // gün akışı sol sütunun boyunca uzasın
                     }
-                    .frame(width: 380)
                 }
-                .fixedSize(horizontal: false, vertical: true)   // gün akışı sol sütunun boyunca uzasın
+                }
             }
             .padding(36)
         }
