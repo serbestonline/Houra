@@ -221,7 +221,7 @@ private struct TodayPage: View {
                     }
                     if WeeklyList.isOn { WeekCard(topics: Array(topics.values)) }
                     }
-                    .gridCellColumns(3)
+                    .gridCellColumns(2)
                     Card {
                         VStack(alignment: .leading, spacing: 16) {
                             Eyebrow(T("Gün akışı", "Day flow"))
@@ -233,6 +233,7 @@ private struct TodayPage: View {
                         }
                         .frame(maxHeight: .infinity, alignment: .top)   // gün akışı sol sütunun boyunca uzasın
                     }
+                    .gridCellColumns(2)
                 }
                 }
             }
