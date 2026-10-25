@@ -206,7 +206,7 @@ The app is plain Swift (AppKit + SwiftUI) in `Sources/`:
 | `Store.swift` | SQLite storage |
 | `Icons.swift`, `IconData.swift` | The 100 embedded icons and a small SVG path parser |
 
-Run the self-test with `build/Houra.app/Contents/MacOS/Houra --selftest`.
+Run the self-test with `build/Houra.app/Contents/MacOS/Houra --selftest`. Turn launch at login on or off from Terminal with `Houra --login on` / `--login off`.
 
 The screenshots and GIFs in this README are produced by the app itself on sample data: `./scripts/make_media.sh` builds the app, seeds a separate demo database and records each scenario. Houra captures only its own windows, so no screen-recording permission is needed.
 

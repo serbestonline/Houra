@@ -1,4 +1,5 @@
 import AppKit
+import ServiceManagement
 
 // Houra: menü çubuğunda duran odak zamanlayıcısı. Oturumlar, molalar, günün yapılacakları ve istatistikler; hepsi yerel.
 //   Houra --selftest   → veri katmanını ve ikon çözümleyicisini geçici bir veritabanında sınar
@@ -30,6 +31,18 @@ if CommandLine.arguments.contains("--selftest") {
     precondition(lightness("#000000") < 1 && lightness("#ffffff") > 99, "açıklık")
     print("selftest: tamam")
     exit(0)
+}
+
+// Houra --login on|off   → açılışta başlatmayı terminalden açar ya da kapatır
+if let i = CommandLine.arguments.firstIndex(of: "--login"), i + 1 < CommandLine.arguments.count {
+    do {
+        if CommandLine.arguments[i + 1] == "on" { try SMAppService.mainApp.register() } else { try SMAppService.mainApp.unregister() }
+        print("açılışta başlat: \(SMAppService.mainApp.status == .enabled ? "açık" : "kapalı")")
+        exit(0)
+    } catch {
+        FileHandle.standardError.write("açılış ayarı değiştirilemedi: \(error.localizedDescription)\n".data(using: .utf8)!)
+        exit(1)
+    }
 }
 
 if CommandLine.arguments.contains("--demo") {
