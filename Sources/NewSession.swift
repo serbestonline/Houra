@@ -44,6 +44,9 @@ private struct NewSessionView: View {
     @State private var goal = NewSessionController.prefillGoal
     @State private var waiting = Store.shared.todos(day: dayKey(Date())).filter { $0.state != .done && $0.sessionID == nil }
     @State private var picked: [Int64] = []
+    @State private var weekly = WeeklyList.load(topics: Store.shared.categories())
+    @State private var pickedWeekly: [Int] = []
+    @State private var source = 0     // 0 bugünün listesi, 1 haftanın listesi
     @State private var extra: [(String, String)] = []
     @State private var newTitle = ""
     @State private var newDetail = ""
@@ -74,24 +77,44 @@ private struct NewSessionView: View {
             UnderlineField(placeholder: T("Neye odaklanıyorsun?", "What are you focusing on?"), text: $goal, size: 26, autofocus: true, onSubmit: begin)
                 .padding(.top, 18)
 
-            if !waiting.isEmpty || !extra.isEmpty {
+            if !waiting.isEmpty || !extra.isEmpty || !weekly.isEmpty {
                 HStack {
-                    Eyebrow(T("Bugünün listesinden seç", "Pick from today's list"))
+                    if weekly.isEmpty {
+                        Eyebrow(T("Bugünün listesinden seç", "Pick from today's list"))
+                    } else {
+                        Segmented(options: [T("Bugünün listesi", "Today's list"), T("Haftanın listesi", "This week's list")], selection: source) { source = $0 }
+                    }
                     Spacer()
-                    let n = picked.count + extra.count
+                    let n = picked.count + pickedWeekly.count + extra.count
                     if n > 0 { Text(T("\(n) görev seçildi", "\(n) tasks selected")).font(.system(size: 12)).foregroundStyle(Ink.muted) }
                 }
                 .padding(.top, 22)
-                VStack(spacing: 2) {
-                    ForEach(waiting) { todo in
-                        PickRow(title: todo.title, detail: todo.detail, selected: picked.contains(todo.id)) {
-                            if let i = picked.firstIndex(of: todo.id) { picked.remove(at: i) } else { picked.append(todo.id) }
+                ScrollView {
+                    VStack(spacing: 2) {
+                        if source == 0 {
+                            if waiting.isEmpty && extra.isEmpty {
+                                Text(T("Bugünün listesinde bekleyen görev yok.", "Nothing waiting on today's list.")).font(.system(size: 12.5)).foregroundStyle(Ink.faint)
+                                    .frame(maxWidth: .infinity, alignment: .leading).padding(8)
+                            }
+                            ForEach(waiting) { todo in
+                                PickRow(title: todo.title, detail: todo.detail, selected: picked.contains(todo.id)) {
+                                    if let i = picked.firstIndex(of: todo.id) { picked.remove(at: i) } else { picked.append(todo.id) }
+                                }
+                            }
+                        } else {
+                            ForEach(weeklySorted) { task in
+                                PickRow(title: task.title, detail: task.detail, selected: pickedWeekly.contains(task.id),
+                                        topic: task.topicID.flatMap { id in topics.first { $0.id == id } }, waiting: task.waiting) {
+                                    if let i = pickedWeekly.firstIndex(of: task.id) { pickedWeekly.remove(at: i) } else { pickedWeekly.append(task.id) }
+                                }
+                            }
+                        }
+                        ForEach(Array(extra.enumerated()), id: \.offset) { i, item in
+                            PickRow(title: item.0, detail: item.1, selected: true) { extra.remove(at: i) }
                         }
                     }
-                    ForEach(Array(extra.enumerated()), id: \.offset) { i, item in
-                        PickRow(title: item.0, detail: item.1, selected: true) { extra.remove(at: i) }
-                    }
                 }
+                .frame(maxHeight: 260)
                 .padding(.top, 8)
             }
 
@@ -118,10 +141,17 @@ private struct NewSessionView: View {
         }
         .padding(30)
         .frame(width: 520)
+        .onAppear { if waiting.isEmpty && !weekly.isEmpty { source = 1 } }
         .background(RoundedRectangle(cornerRadius: 28, style: .continuous).fill(Ink.glassStrong))
         .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).strokeBorder(Ink.line))
         .foregroundStyle(Ink.text)
         .environment(\.colorScheme, .dark)
+    }
+
+    /// Seçili kategorinin görevleri üstte; dosyadaki sıra korunur.
+    private var weeklySorted: [WeeklyTask] {
+        let mine = weekly.filter { $0.topicID != nil && $0.topicID == topic?.id }
+        return mine + weekly.filter { !mine.contains($0) }
     }
 
     private func addTask() {
@@ -136,14 +166,18 @@ private struct NewSessionView: View {
         guard let topic else { return }
         UserDefaults.standard.set(topic.id, forKey: "lastTopic")
         UserDefaults.standard.set(long, forKey: "longRhythm")
-        Focus.shared.start(topic: topic, goal: goal.trimmingCharacters(in: .whitespaces), todoIDs: picked, newTodos: extra,
+        let fromWeek = weekly.filter { pickedWeekly.contains($0.id) }.map { ($0.title, $0.detail) }
+        Focus.shared.start(topic: topic, goal: goal.trimmingCharacters(in: .whitespaces), todoIDs: picked, newTodos: fromWeek + extra,
                            work: long ? 50 : 25, rest: long ? 10 : 5)
         close()
     }
 }
 
 private struct PickRow: View {
-    let title: String, detail: String, selected: Bool, toggle: () -> Void
+    let title: String, detail: String, selected: Bool
+    var topic: Topic? = nil
+    var waiting = false
+    let toggle: () -> Void
     @State private var hovering = false
 
     var body: some View {
@@ -155,11 +189,15 @@ private struct PickRow: View {
                     .overlay(Image(systemName: "checkmark").font(.system(size: 11, weight: .bold)).foregroundStyle(.black).opacity(selected ? 1 : 0))
                     .frame(width: 24, height: 24)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(title).font(.system(size: 13.5))
-                    if !detail.isEmpty { Text(detail).font(.system(size: 11.5)).foregroundStyle(Ink.muted) }
+                    Text(title).font(.system(size: 13.5)).lineLimit(2)
+                    if !detail.isEmpty || waiting {
+                        Text((waiting ? T("bekleniyor", "waiting") + (detail.isEmpty ? "" : " · ") : "") + detail)
+                            .font(.system(size: 11.5)).foregroundStyle(Ink.muted).lineLimit(1)
+                    }
                 }
                 .padding(.top, 3)
-                Spacer()
+                Spacer(minLength: 6)
+                if let topic { CategorySwatch(category: topic, size: 14).padding(.top, 5) }
             }
             .padding(8)
             .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(selected ? 0.08 : hovering ? 0.04 : 0)))

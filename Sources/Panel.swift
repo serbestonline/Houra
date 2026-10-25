@@ -581,6 +581,8 @@ private struct SettingsPage: View {
     @State private var language = Language.current
     @State private var style = Widgets.shared.style
     @State private var login = SMAppService.mainApp.status == .enabled
+    @State private var weeklyTemplate = WeeklyList.template
+    private static let examplePattern = "AA Daily/* - {YYYY}/Hafta {WW}/Hafta {WW} - Yapılacaklar.md"
 
     var body: some View {
         ScrollView {
@@ -612,6 +614,23 @@ private struct SettingsPage: View {
                 }
                 Card {
                     VStack(alignment: .leading, spacing: 10) {
+                        Eyebrow(T("Haftalık görevler", "Weekly tasks"))
+                        Text(T("Obsidian'daki haftalık notun gibi bir Markdown dosyasındaki açık görevler yeni oturum penceresinde \"Haftanın listesi\" olarak görünür. Dosya yalnız okunur. Yol her açılışta bugünün tarihiyle çözülür: {YYYY} yıl, {WW} hafta, {MM} ay, * herhangi bir klasör.",
+                               "Open tasks from a Markdown file, such as your weekly note in Obsidian, show up as \"This week's list\" in the new session window. The file is only read. The path is resolved with today's date every time: {YYYY} year, {WW} week, {MM} month, * any folder."))
+                            .font(.system(size: 13)).foregroundStyle(Ink.muted)
+                        UnderlineField(placeholder: "~/Obsidian/Vault/" + Self.examplePattern, text: $weeklyTemplate, size: 12)
+                            .onChange(of: weeklyTemplate) { WeeklyList.template = $0 }
+                        HStack(spacing: 8) {
+                            Button(T("Kasa klasörünü seç…", "Choose vault folder…"), action: chooseVault).buttonStyle(SecondaryButtonStyle()).frame(width: 200)
+                            if !weeklyTemplate.isEmpty {
+                                Button(T("Kapat", "Turn off")) { weeklyTemplate = "" }.buttonStyle(SecondaryButtonStyle()).frame(width: 90)
+                            }
+                        }
+                        Text(weeklyStatus).font(.system(size: 12)).foregroundStyle(Ink.faint)
+                    }
+                }
+                Card {
+                    VStack(alignment: .leading, spacing: 10) {
                         Eyebrow(T("Veriler", "Data"))
                         Text(T("Bütün oturumlar, görevler ve notlar yalnız bu Mac'te, yerel bir SQLite dosyasında durur.",
                                "All sessions, tasks and notes stay on this Mac, in a local SQLite file."))
@@ -629,6 +648,22 @@ private struct SettingsPage: View {
             }
             .padding(36)
         }
+    }
+
+    private var weeklyStatus: String {
+        guard !weeklyTemplate.trimmingCharacters(in: .whitespaces).isEmpty else { return T("Kapalı.", "Off.") }
+        guard let file = WeeklyList.file(template: weeklyTemplate) else { return T("Bu haftanın dosyası bulunamadı.", "This week's file wasn't found.") }
+        let n = (try? String(contentsOf: file, encoding: .utf8)).map { WeeklyList.parse($0, topics: Store.shared.categories()).count } ?? 0
+        return T("Bu hafta: \(file.lastPathComponent) · \(n) açık görev", "This week: \(file.lastPathComponent) · \(n) open tasks")
+    }
+
+    private func chooseVault() {
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        panel.prompt = T("Seç", "Choose")
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        weeklyTemplate = (url.path as NSString).abbreviatingWithTildeInPath + "/" + Self.examplePattern
     }
 
     private func row<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {

@@ -50,6 +50,7 @@ Start a session from the menu bar, from the panel, or from anywhere with **⌥�
 - **Category:** each category has its own colour and, optionally, an emoji or one of 100 built-in icons.
 - **Goal:** answer *What are you focusing on?* in a few words.
 - **Tasks:** tick tasks from today's list, or write new ones with a title and optional details. New tasks are added to today's list too.
+- **This week's list:** if you plan your week in a Markdown file, for example a weekly note in Obsidian, Houra reads its open tasks and lets you pick them too. Tasks of the selected category come first. Set the path in *Settings › Weekly tasks*; it can contain the year, week and month (`{YYYY}`, `{WW}`, `{MM}`) and `*` for any folder, so it follows you into next week by itself. The file is only read, never written.
 - **Rhythm:** two fixed rhythms, **25 + 5** and **50 + 10**. No fiddling with minutes.
 
 During the session every task has three states, cycled with a click:

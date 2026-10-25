@@ -28,6 +28,11 @@ if CommandLine.arguments.contains("--selftest") {
         precondition(box.width > 40 && box.width < 260 && box.height > 40 && box.height < 260, "ikon sınırları: \(entry.name) \(box)")
     }
     precondition(iconLibrary.count == 100, "100 ikon")
+    let note = "##### Labra\n- [ ] #labra Siteyi gez → [[Demo]]\n- [x] #labra Bitti ✅ 2026-10-20\n##### Maestrock\n- 1.0\n\t- [ ] #maestrock Sunum\n- [w] #maestrock Bekleyen [[Kişi|Ali]]\n- [ ] #maestrock Taşındı → Hafta 44\n\t- 22.10: not"
+    let topicsNow = store.categories() + [Topic(id: 99, name: "Maestrocks", color: "#000000")]
+    let week = WeeklyList.parse(note, topics: topicsNow)
+    precondition(week.map(\.title) == ["Siteyi gez", "Sunum", "Bekleyen Ali"], "haftalık ayrıştırma: \(week.map(\.title))")
+    precondition(week[1].detail == "1.0" && week[1].topicID == 99 && week[2].waiting, "haftalık ayrıntılar")
     precondition(lightness("#000000") < 1 && lightness("#ffffff") > 99, "açıklık")
     print("selftest: tamam")
     exit(0)
