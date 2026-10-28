@@ -33,11 +33,14 @@ struct DetailView: View {
                     }
                 }
                 Text(focus.session?.goal ?? "").font(.system(size: 21, weight: .medium)).padding(.top, 14)
-                Text(formatClock(focus.remaining))
+                Text(formatClock(focus.clock))
                     .font(.system(size: 68, weight: .ultraLight)).monospacedDigit().tracking(-2)
                     .padding(.top, 10)
                 if let s = focus.session, let end = focus.plannedEnd {
                     Text("\(formatTime(s.start)) → \(formatTime(end)) · \(T("\(s.workMinutes) dk", "\(s.workMinutes) min"))")
+                        .font(.system(size: 12.5)).foregroundStyle(Ink.muted).monospacedDigit().padding(.top, 6)
+                } else if let s = focus.session {
+                    Text(T("Başlangıç \(formatTime(s.start)) · serbest · 50. dakikada mola hatırlatılır", "Started \(formatTime(s.start)) · free · break reminder at 50 min"))
                         .font(.system(size: 12.5)).foregroundStyle(Ink.muted).monospacedDigit().padding(.top, 6)
                 }
                 ProgressLine(value: focus.progress).padding(.top, 16)

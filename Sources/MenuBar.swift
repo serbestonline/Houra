@@ -19,6 +19,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let focus = Focus.shared
         focus.$now.combineLatest(focus.$phase).sink { [weak self] _ in self?.refreshButton() }.store(in: &cancellables)
         focus.onRestStart = { RestOverlay.shared.show() }
+        focus.onBreakNudge = {
+            Chime.play()
+            ScreenPulse.flash()
+            Widgets.shared.showNudge()
+        }
         focus.onRestEnd = { _ in
             RestOverlay.shared.hide()
             NewSessionController.shared.show()
@@ -43,7 +48,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let text: String
         switch f.phase {
         case .idle: text = ""
-        case .focus, .paused: text = " " + formatClock(f.remaining)
+        case .focus, .paused: text = " " + formatClock(f.clock)
         case .rest: text = " " + formatClock(f.restRemaining)
         }
         button.attributedTitle = NSAttributedString(string: text, attributes: [.font: NSFont.monospacedDigitSystemFont(ofSize: 13, weight: .regular)])
@@ -69,7 +74,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         case .focus, .paused:
             let name = f.topic?.name ?? ""
             menu.addItem(header("● \(name) · \(f.session?.goal ?? "")",
-                                T("\(formatClock(f.remaining)) kaldı", "\(formatClock(f.remaining)) left") + (f.activeTodo.map { T(" · şu an: ", " · now: ") + $0.title } ?? "")))
+                                (f.isFree ? T("serbest · \(formatClock(f.clock))", "free · \(formatClock(f.clock))") : T("\(formatClock(f.remaining)) kaldı", "\(formatClock(f.remaining)) left")) + (f.activeTodo.map { T(" · şu an: ", " · now: ") + $0.title } ?? "")))
             menu.addItem(.separator())
             if f.phase == .focus {
                 menu.addItem(item(T("Duraklat", "Pause"), key: ".") { Focus.shared.pause() })
@@ -99,7 +104,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         var seen = Set<String>()
         for s in Store.shared.sessions(from: Date().addingTimeInterval(-30 * 86400), to: .distantFuture).reversed() {
             guard let t = topics[s.categoryID], seen.insert("\(s.categoryID)|\(s.goal)|\(s.workMinutes)").inserted else { continue }
-            let it = item("\(t.name) · \(s.goal)  (\(s.workMinutes) + \(s.restMinutes))") {
+            let it = item("\(t.name) · \(s.goal)  (\(s.rhythm))") {
                 Focus.shared.start(topic: t, goal: s.goal, todoIDs: [], newTodos: [], work: s.workMinutes, rest: s.restMinutes)
             }
             it.image = NSImage(size: NSSize(width: 10, height: 10), flipped: false) { r in

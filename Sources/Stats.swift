@@ -641,7 +641,7 @@ private struct DayDrawer: View {
                             Circle().fill(Color(hex: topics[s.categoryID]?.color ?? "#888888")).frame(width: 8, height: 8)
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("\(topics[s.categoryID]?.name ?? "") · \(s.goal)").font(.system(size: 13, weight: .medium)).lineLimit(1)
-                                Text("\(formatTime(s.start)) – \(formatTime(s.end ?? s.start)) · \(s.workMinutes) + \(s.restMinutes)"
+                                Text("\(formatTime(s.start)) – \(formatTime(s.end ?? s.start)) · \(s.rhythm)"
                                      + (todos.isEmpty ? "" : T(" · \(todos.filter { $0.state == .done }.count)/\(todos.count) görev 🥳", " · \(todos.filter { $0.state == .done }.count)/\(todos.count) tasks 🥳")))
                                     .font(.system(size: 11.5)).foregroundStyle(Ink.muted).monospacedDigit()
                             }

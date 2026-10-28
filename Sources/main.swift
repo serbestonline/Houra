@@ -23,6 +23,10 @@ if CommandLine.arguments.contains("--selftest") {
     precondition(sessions.count == 1 && sessions[0].minutes == 25, "oturum kaydı")
     precondition(store.todos(session: s).first?.state == .done, "oturumun görevi")
     precondition(TodoState.done.next == .waiting, "durum döngüsü")
+    let free = store.startSession(category: cat, goal: "Serbest", work: 0, rest: 10)
+    store.setFocus(session: free, seconds: 4200)
+    let freeRow = store.sessions(from: Date().addingTimeInterval(-60), to: Date().addingTimeInterval(60)).last!
+    precondition(freeRow.id == free && freeRow.minutes == 70 && freeRow.end == nil && freeRow.rhythm != "0 + 10", "serbest oturum")
     for entry in iconLibrary {
         let box = SVGPath.parse(entry.path).boundingBoxOfPath
         precondition(box.width > 40 && box.width < 260 && box.height > 40 && box.height < 260, "ikon sınırları: \(entry.name) \(box)")
@@ -37,6 +41,8 @@ if CommandLine.arguments.contains("--selftest") {
     var first = store.categories()[0]; first.iconColor = "#123456"; store.updateCategory(first)
     precondition(store.categories()[0].iconColor == "#123456", "ikon rengi")
     precondition(lightness("#000000") < 1 && lightness("#ffffff") > 99, "açıklık")
+    let chime = Chime.wav()
+    precondition(chime.count == 44 + 4 * 44_100 * 2 && chime.prefix(4) == Data("RIFF".utf8) && NSSound(data: chime) != nil, "mola sesi")
     print("selftest: tamam")
     exit(0)
 }

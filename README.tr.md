@@ -39,7 +39,7 @@ Oturumu menü çubuğundan, panelden ya da her yerden **⌥⌘N** ile başlatır
 - **Hedef:** *Neye odaklanıyorsun?* sorusuna birkaç kelimeyle cevap verirsin.
 - **Görevler:** bugünün listesinden seçersin ya da başlık ve isteğe bağlı açıklamayla yenisini yazarsın. Yeni görevler bugünün listesine de eklenir.
 - **Haftanın listesi:** haftanı bir Markdown dosyasında, örneğin Obsidian'daki haftalık notunda planlıyorsan Houra oradaki açık görevleri okur, onlardan da seçebilirsin. Seçili kategorinin görevleri üstte gelir, alt görevler üst görevlerinin altında girintili durur. *Ayarlar › Haftalık görevler*'de açıp yolu verirsin; yıl, hafta ve ay (`{YYYY}`, `{WW}`, `{MM}`) ile herhangi bir klasör için `*` içerebilir, böylece hafta dönünce kendiliğinden yeni dosyaya geçer. Dosya yalnız okunur, hiçbir şey yazılmaz.
-- **Ritim:** iki sabit ritim: **25 + 5** ve **50 + 10**.
+- **Ritim:** iki sabit ritim: **25 + 5** ve **50 + 10**. Ya da **serbest**: sayaç ileri akar, her 50 dakikada ekran yanıp söner ve widget mola isteyip istemediğini sorar; mola isteğe bağlıdır.
 
 Oturum sırasında her görevin üç durumu vardır, tıklayarak değişir:
 

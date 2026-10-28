@@ -414,7 +414,7 @@ private struct SessionRow: View {
     var body: some View {
         let todos = Store.shared.todos(session: session.id)
         let done = todos.filter { $0.state == .done }.count
-        let meta = "\(formatTime(session.start)) – \(formatTime(session.end ?? session.start)) · \(session.workMinutes) + \(session.restMinutes)"
+        let meta = "\(formatTime(session.start)) – \(formatTime(session.end ?? session.start)) · \(session.rhythm)"
             + (todos.isEmpty ? "" : T(" · \(done)/\(todos.count) görev", " · \(done)/\(todos.count) tasks"))
             + (session.note.isEmpty ? "" : " · 📝") + (session.emergency ? T(" · acil durum", " · emergency") : "")
         VStack(alignment: .leading, spacing: 0) {

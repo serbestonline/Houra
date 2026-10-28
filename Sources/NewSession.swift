@@ -54,7 +54,9 @@ private struct NewSessionView: View {
     @State private var extra: [(String, String)] = []
     @State private var newTitle = ""
     @State private var newDetail = ""
-    @State private var long = UserDefaults.standard.object(forKey: "longRhythm") as? Bool ?? true
+    /// 25, 50 ya da 0 (serbest: ileri sayar, 50. dakikada mola hatırlatır).
+    @State private var work = UserDefaults.standard.object(forKey: "rhythmWork") as? Int
+        ?? (UserDefaults.standard.object(forKey: "longRhythm") as? Bool ?? true ? 50 : 25)
 
     private var topic: Topic? { topics.first { $0.id == topicID } ?? topics.first }
 
@@ -135,14 +137,17 @@ private struct NewSessionView: View {
 
             Eyebrow(T("Ritim", "Rhythm")).padding(.top, 22)
             HStack(spacing: 10) {
-                RhythmCard(work: 25, rest: 5, selected: !long) { long = false }
-                RhythmCard(work: 50, rest: 10, selected: long) { long = true }
+                RhythmCard(big: "25", unit: T("dk odak", "min focus"), sub: T("+ 5 dk mola", "+ 5 min break"), selected: work == 25) { work = 25 }
+                RhythmCard(big: "50", unit: T("dk odak", "min focus"), sub: T("+ 10 dk mola", "+ 10 min break"), selected: work == 50) { work = 50 }
             }
             .padding(.top, 10)
+            RhythmCard(big: T("Serbest", "Free"), unit: "", sub: T("İleri sayar, 50. dakikada mola önerir", "Counts up, suggests a break at 50 min"),
+                       icon: "infinity", selected: work == 0) { work = 0 }
+                .padding(.top, 10)
 
             HStack(spacing: 8) {
                 Button(T("Vazgeç", "Cancel"), action: close).buttonStyle(SecondaryButtonStyle()).keyboardShortcut(.cancelAction)
-                Button(T("Başla · \(long ? 50 : 25) dk", "Start · \(long ? 50 : 25) min"), action: begin).buttonStyle(PrimaryButtonStyle())
+                Button(work == 0 ? T("Başla · serbest", "Start · free") : T("Başla · \(work) dk", "Start · \(work) min"), action: begin).buttonStyle(PrimaryButtonStyle())
                     .keyboardShortcut(.defaultAction)
             }
             .padding(.top, 24)
@@ -175,10 +180,10 @@ private struct NewSessionView: View {
         addTask()
         guard let topic else { return }
         UserDefaults.standard.set(topic.id, forKey: "lastTopic")
-        UserDefaults.standard.set(long, forKey: "longRhythm")
+        UserDefaults.standard.set(work, forKey: "rhythmWork")
         let fromWeek = weekly.filter { pickedWeekly.contains($0.id) }.map { ($0.title, $0.detail) }
         Focus.shared.start(topic: topic, goal: goal.trimmingCharacters(in: .whitespaces), todoIDs: picked, newTodos: fromWeek + extra,
-                           work: long ? 50 : 25, rest: long ? 10 : 5)
+                           work: work, rest: work == 25 ? 5 : 10)
         close()
     }
 }
@@ -220,15 +225,20 @@ private struct PickRow: View {
 }
 
 private struct RhythmCard: View {
-    let work: Int, rest: Int, selected: Bool, action: () -> Void
+    let big: String, unit: String, sub: String
+    var icon: String? = nil
+    let selected: Bool, action: () -> Void
     var body: some View {
         Button(action: action) {
-            VStack(alignment: .leading, spacing: 3) {
-                HStack(alignment: .firstTextBaseline, spacing: 4) {
-                    Text("\(work)").font(.system(size: 28, weight: .ultraLight))
-                    Text(T("dk odak", "min focus")).font(.system(size: 12)).foregroundStyle(Ink.muted)
+            HStack(spacing: 14) {
+                if let icon { Image(systemName: icon).font(.system(size: 22, weight: .light)).frame(width: 30) }
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack(alignment: .firstTextBaseline, spacing: 4) {
+                        Text(big).font(.system(size: 28, weight: .ultraLight))
+                        Text(unit).font(.system(size: 12)).foregroundStyle(Ink.muted)
+                    }
+                    Text(sub).font(.system(size: 11.5)).foregroundStyle(Ink.muted).lineLimit(1)
                 }
-                Text(T("+ \(rest) dk mola", "+ \(rest) min break")).font(.system(size: 11.5)).foregroundStyle(Ink.muted)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 16).padding(.vertical, 12)

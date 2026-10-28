@@ -47,6 +47,7 @@ final class Widgets: ObservableObject {
     /// Kenara yapışan görünümün tarafı.
     @Published var onLeft = UserDefaults.standard.bool(forKey: "widgetLeft") { didSet { UserDefaults.standard.set(onLeft, forKey: "widgetLeft") } }
     @Published var detailOpen = false
+    @Published private(set) var nudging = false
 
     private var compact: FloatingPanel?
     private var detail: FloatingPanel?
@@ -82,6 +83,7 @@ final class Widgets: ObservableObject {
 
     private func teardown() {
         closeDetail()
+        nudging = false
         compact?.orderOut(nil)
         compact = nil
     }
@@ -121,7 +123,7 @@ final class Widgets: ObservableObject {
 
     func hover(_ inside: Bool) {
         openTimer?.invalidate()
-        guard inside, !detailOpen, dragOrigin == nil else { return }
+        guard inside, !detailOpen, !nudging, dragOrigin == nil else { return }
         openTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { [weak self] _ in self?.openDetail() }
     }
 
@@ -182,10 +184,36 @@ final class Widgets: ObservableObject {
         NSAnimationContext.runAnimationGroup({ c in c.duration = 0.25; d.animator().alphaValue = 0 }, completionHandler: { d.orderOut(nil) })
     }
 
+    // MARK: Mola hatırlatması
+
+    /// Serbest oturumda 50 dakika dolunca görünümün kendisi mola sorusuna döner; Devam et ile eski haline gelir.
+    func showNudge() {
+        closeDetail()
+        nudging = true
+        resizeCompact(to: nudgeSize)
+    }
+
+    func endNudge() {
+        nudging = false
+        resizeCompact(to: compactSize)
+    }
+
+    private var nudgeSize: NSSize {
+        style == .strip || style == .card ? compactSize : NSSize(width: max(compactSize.width, 270), height: 186)
+    }
+
+    /// Üst kenarı ve yapıştığı yanı yerinde tutarak boyutu değiştirir.
+    private func resizeCompact(to size: NSSize) {
+        guard let c = compact, c.frame.size != size else { return }
+        let f = c.frame, vf = c.screen?.visibleFrame ?? f
+        let right = style.snapsToEdge ? !onLeft : f.midX > vf.midX
+        c.setFrame(NSRect(x: right ? f.maxX - size.width : f.minX, y: f.maxY - size.height, width: size.width, height: size.height), display: true)
+    }
+
     // MARK: Sürükleme
 
     func dragChanged() {
-        guard let compact else { return }
+        guard let compact, !nudging else { return }
         openTimer?.invalidate()
         if detailOpen { closeDetail() }
         let m = NSEvent.mouseLocation
@@ -220,6 +248,33 @@ final class Widgets: ObservableObject {
 }
 
 // MARK: - Görünümler
+
+/// Bütün ekranlar üç kez beyaz yanıp söner; tıklamaları engellemez.
+enum ScreenPulse {
+    static func flash() {
+        for screen in NSScreen.screens {
+            let w = NSWindow(contentRect: screen.frame, styleMask: .borderless, backing: .buffered, defer: false)
+            w.isOpaque = false
+            w.backgroundColor = .clear
+            w.ignoresMouseEvents = true
+            w.level = .screenSaver
+            w.isReleasedWhenClosed = false
+            w.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary, .ignoresCycle]
+            let v = NSView(frame: NSRect(origin: .zero, size: screen.frame.size))
+            v.wantsLayer = true
+            v.layer?.backgroundColor = NSColor.white.withAlphaComponent(0.22).cgColor
+            v.layer?.borderColor = NSColor.white.withAlphaComponent(0.9).cgColor
+            v.layer?.borderWidth = 8
+            v.layer?.opacity = 0
+            w.contentView = v
+            w.orderFrontRegardless()
+            let a = CABasicAnimation(keyPath: "opacity")
+            a.fromValue = 0; a.toValue = 1; a.duration = 0.3; a.autoreverses = true; a.repeatCount = 3
+            v.layer?.add(a, forKey: "pulse")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { w.orderOut(nil) }
+        }
+    }
+}
 
 /// Ayrıntı panelinin kabı: cam zemin, kenara yapışıksa o tarafta köşesiz.
 private struct DetailCard: View {
@@ -257,6 +312,10 @@ private struct CompactView: View {
     }
 
     @ViewBuilder private var content: some View {
+        if widgets.nudging { nudge } else { styled }
+    }
+
+    @ViewBuilder private var styled: some View {
         switch style {
         case .tag: tag
         case .strip: strip
@@ -283,7 +342,7 @@ private struct CompactView: View {
                 groupName
                 Text(focus.headline).font(.system(size: 14, weight: .medium)).lineLimit(1).frame(maxWidth: 170, alignment: .leading)
             }
-            Text(formatClock(focus.remaining)).font(.system(size: 24, weight: .light)).monospacedDigit()
+            Text(formatClock(focus.clock)).font(.system(size: 24, weight: .light)).monospacedDigit()
             if left { grip }
         }
         .padding(.leading, left ? 18 : 14).padding(.trailing, left ? 14 : 18).frame(height: 66)
@@ -300,6 +359,32 @@ private struct CompactView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: left ? .leading : .trailing)
     }
 
+    // Mola sorusu: serbest oturumda 50 dakika dolunca her görünüm buna döner
+    private var nudge: some View {
+        let left = widgets.onLeft, edge = style.snapsToEdge
+        let shape = SideRoundedRect(radius: 20, flatLeft: edge && left, flatRight: edge && !left)
+        return VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                groupName
+                Spacer()
+                Text(formatClock(focus.clock)).font(.system(size: 14, weight: .light)).monospacedDigit().foregroundStyle(Ink.muted)
+            }
+            Text(T("\(Int(focus.elapsed) / 60) dakikadır çalışıyorsun", "\(Int(focus.elapsed) / 60) minutes in")).font(.system(size: 15, weight: .medium)).padding(.top, 10)
+            Text(T("Mola isteğe bağlı.", "The break is optional.")).font(.system(size: 11.5)).foregroundStyle(Ink.muted).padding(.top, 3)
+            HStack(spacing: 6) {
+                Button(T("Devam et", "Keep going")) { widgets.endNudge() }.buttonStyle(SecondaryButtonStyle())
+                Button(T("Mola ver", "Take a break")) { focus.finish() }.buttonStyle(PrimaryButtonStyle())
+            }
+            .padding(.top, 14)
+        }
+        .padding(16)
+        .frame(width: 240)
+        .background(shape.fill(Ink.glass))
+        .overlay(shape.strokeBorder(Ink.line))
+        .shadow(color: .black.opacity(0.4), radius: 16, x: edge ? (left ? 8 : -8) : 0, y: 10)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: edge ? (left ? .leading : .trailing) : .center)
+    }
+
     private var grip: some View { Capsule().fill(Color.white.opacity(0.18)).frame(width: 3, height: 26) }
 
     // İnce şerit: ekran kenarında, aşağıdan dolar; etiketi dolumun tepesinde
@@ -312,7 +397,7 @@ private struct CompactView: View {
                     .frame(width: 5, height: g.size.height * focus.progress)
                     .shadow(color: .white.opacity(0.35), radius: 8)
                 VStack(alignment: left ? .leading : .trailing, spacing: 1) {
-                    Text(formatClock(focus.remaining)).font(.system(size: 15)).monospacedDigit()
+                    Text(formatClock(focus.clock)).font(.system(size: 15)).monospacedDigit()
                     Text(focus.headline).font(.system(size: 10.5)).foregroundStyle(Ink.muted).lineLimit(1).frame(maxWidth: 200, alignment: left ? .leading : .trailing)
                 }
                 .padding(.horizontal, 11).padding(.vertical, 7)
@@ -338,7 +423,7 @@ private struct CompactView: View {
             }
             .padding(.leading, 10)
             Spacer(minLength: 0)
-            Text(formatClock(focus.remaining)).font(.system(size: 22, weight: .light)).monospacedDigit()
+            Text(formatClock(focus.clock)).font(.system(size: 22, weight: .light)).monospacedDigit()
             Button { focus.phase == .paused ? focus.resume() : focus.pause() } label: {
                 ZStack {
                     RingShape(progress: 1).stroke(Color.white.opacity(0.1), lineWidth: 2.5)
@@ -364,7 +449,7 @@ private struct CompactView: View {
             ZStack {
                 RingShape(progress: 1).stroke(Color.white.opacity(0.08), lineWidth: 5)
                 RingShape(progress: focus.progress).stroke(LinearGradient(colors: [.white, Color(white: 0.7)], startPoint: .top, endPoint: .bottom), style: StrokeStyle(lineWidth: 5, lineCap: .round))
-                Text(formatClock(focus.remaining)).font(.system(size: 34, weight: .thin)).monospacedDigit()
+                Text(formatClock(focus.clock)).font(.system(size: 34, weight: .thin)).monospacedDigit()
             }
             .frame(width: 150, height: 150)
             Text(focus.headline).font(.system(size: 13, weight: .medium)).lineLimit(1).frame(maxWidth: 180)
@@ -384,7 +469,7 @@ private struct CompactView: View {
             Circle().strokeBorder(Ink.line)
             RingShape(progress: 1).stroke(Color.white.opacity(0.08), lineWidth: 3).padding(6)
             RingShape(progress: focus.progress).stroke(Color.white, style: StrokeStyle(lineWidth: 3, lineCap: .round)).padding(6)
-            Text(formatClock(focus.remaining)).font(.system(size: 14, weight: .medium)).monospacedDigit()
+            Text(formatClock(focus.clock)).font(.system(size: 14, weight: .medium)).monospacedDigit()
         }
         .frame(width: 80, height: 80)
         .shadow(color: .black.opacity(0.4), radius: 16, y: 10)

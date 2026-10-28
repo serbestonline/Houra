@@ -17,21 +17,30 @@ final class Focus: ObservableObject {
     /// Mola başlayınca ve bitince ekranı yöneten taraf (AppDelegate) bunlara bağlanır.
     var onRestStart: () -> Void = {}
     var onRestEnd: (_ early: Bool) -> Void = { _ in }
+    /// Serbest oturumda her 50 dakikada bir: mola hatırlatması (molayı vermek isteğe bağlı).
+    var onBreakNudge: () -> Void = {}
+
+    /// Serbest oturum: sayaç ileri akar, süre dolmaz; her bu kadar saniyede bir mola hatırlatılır.
+    static let freeNudgeSeconds = 50 * 60
 
     private var pausedAt: Date?
     private var pausedTotal: TimeInterval = 0
     private(set) var restEnd: Date?
     private var timer: Timer?
+    private var nudges = 0
 
     private init() {
         timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in self?.tick() }
         timer?.tolerance = 0.1
+        RunLoop.main.add(timer!, forMode: .common)   // mola uyarısı açıkken de sayaç aksın
         closeAbandoned()
     }
 
     // MARK: Okuma
 
-    var workSeconds: Int { (session?.workMinutes ?? 50) * 60 }
+    /// Ritmi 0 dakika olan oturum serbesttir.
+    var isFree: Bool { session?.workMinutes == 0 }
+    var workSeconds: Int { isFree ? Focus.freeNudgeSeconds : (session?.workMinutes ?? 50) * 60 }
     var restSeconds: Int { (session?.restMinutes ?? 10) * 60 }
 
     var elapsed: TimeInterval {
@@ -39,9 +48,11 @@ final class Focus: ObservableObject {
         return max(0, (pausedAt ?? now).timeIntervalSince(s.start) - pausedTotal)
     }
     var remaining: Int { max(0, workSeconds - Int(elapsed)) }
+    /// Ekranda yazan süre: serbestte geçen, değilse kalan.
+    var clock: Int { isFree ? Int(elapsed) : remaining }
     var progress: Double { min(1, elapsed / Double(workSeconds)) }
     var restRemaining: Int { max(0, Int((restEnd ?? now).timeIntervalSince(now).rounded(.up))) }
-    var plannedEnd: Date? { session.map { $0.start.addingTimeInterval(Double(workSeconds) + pausedTotal) } }
+    var plannedEnd: Date? { isFree ? nil : session.map { $0.start.addingTimeInterval(Double(workSeconds) + pausedTotal) } }
     var activeTodo: Todo? { todos.first { $0.state == .doing } }
 
     /// Küçük görünümlerde yazan: o an yapılan görev, yoksa oturumun hedefi.
@@ -60,7 +71,7 @@ final class Focus: ObservableObject {
         }
         self.topic = topic
         session = Store.shared.sessions(from: Date().addingTimeInterval(-5), to: .distantFuture).last { $0.id == id }
-        pausedAt = nil; pausedTotal = 0; restEnd = nil
+        pausedAt = nil; pausedTotal = 0; restEnd = nil; nudges = 0
         note = ""
         reloadTodos()
         phase = .focus
@@ -77,11 +88,13 @@ final class Focus: ObservableObject {
         pausedTotal += Date().timeIntervalSince(p); pausedAt = nil; phase = .focus
     }
 
+    private var focusSeconds: Int { isFree ? Int(elapsed) : min(workSeconds, Int(elapsed)) }
+
     /// Oturumu bitirir ve molaya geçer (süre dolunca ya da Bitir'e basınca).
     func finish() {
         guard let s = session, phase == .focus || phase == .paused else { return }
         if phase == .paused { resume() }
-        Store.shared.finishSession(id: s.id, end: Date(), focusSeconds: min(workSeconds, Int(elapsed)))
+        Store.shared.finishSession(id: s.id, end: Date(), focusSeconds: focusSeconds)
         restEnd = Date().addingTimeInterval(Double(restSeconds))
         phase = .rest
         onRestStart()
@@ -105,7 +118,7 @@ final class Focus: ObservableObject {
     /// Molasız tamamen durdurur (yeni oturum eskisinin üstüne başlarken).
     func stop() {
         if let s = session, phase == .focus || phase == .paused {
-            Store.shared.finishSession(id: s.id, end: Date(), focusSeconds: min(workSeconds, Int(elapsed)))
+            Store.shared.finishSession(id: s.id, end: Date(), focusSeconds: focusSeconds)
         }
         phase = .idle; session = nil; topic = nil; todos = []; restEnd = nil
     }
@@ -128,7 +141,13 @@ final class Focus: ObservableObject {
 
     private func tick() {
         now = Date()
-        if phase == .focus && remaining == 0 { finish() }
+        if phase == .focus && !isFree && remaining == 0 { finish() }
+        if phase == .focus && isFree, let s = session {
+            let mark = Int(elapsed) / Focus.freeNudgeSeconds
+            if mark > nudges { nudges = mark; onBreakNudge() }
+            // Uygulama kapanırsa geçen süre kaybolmasın diye dakikada bir kaydedilir.
+            if Int(elapsed) % 60 == 0 { Store.shared.setFocus(session: s.id, seconds: Int(elapsed)) }
+        }
         if phase == .rest && restRemaining == 0 { endRest(emergency: false) }
     }
 
@@ -136,7 +155,7 @@ final class Focus: ObservableObject {
     private func closeAbandoned() {
         let store = Store.shared
         for s in store.sessions(from: Date().addingTimeInterval(-3 * 86400), to: .distantFuture) where s.end == nil {
-            let planned = s.workMinutes * 60
+            let planned = s.workMinutes == 0 ? s.focusSeconds : s.workMinutes * 60   // serbest: son kaydedilen süre
             let end = min(Date(), s.start.addingTimeInterval(Double(planned)))
             store.finishSession(id: s.id, end: end, focusSeconds: Int(end.timeIntervalSince(s.start)))
         }

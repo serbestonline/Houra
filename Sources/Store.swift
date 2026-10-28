@@ -40,6 +40,8 @@ struct Session: Identifiable, Equatable {
     var emergency: Bool       // moladan acil durumla erken dönüldü
 
     var minutes: Int { focusSeconds / 60 }
+    /// "50 + 10" ya da serbest oturum için "serbest".
+    var rhythm: String { workMinutes == 0 ? T("serbest", "free") : "\(workMinutes) + \(restMinutes)" }
 }
 
 extension Notification.Name {
@@ -180,6 +182,10 @@ final class Store {
     func finishSession(id: Int64, end: Date, focusSeconds: Int) {
         run("UPDATE sessions SET end = ?, focus_sec = ? WHERE id = ?", [.real(end.timeIntervalSince1970), .int(Int64(focusSeconds)), .int(id)])
         changed()
+    }
+
+    func setFocus(session: Int64, seconds: Int) {
+        run("UPDATE sessions SET focus_sec = ? WHERE id = ?", [.int(Int64(seconds)), .int(session)])
     }
 
     func setNote(session: Int64, _ note: String) {
