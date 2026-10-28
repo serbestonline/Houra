@@ -142,7 +142,7 @@ private struct NewSessionView: View {
             }
             .padding(.top, 10)
             RhythmCard(big: T("Serbest", "Free"), unit: "", sub: T("İleri sayar, 50. dakikada mola önerir", "Counts up, suggests a break at 50 min"),
-                       icon: "infinity", selected: work == 0) { work = 0 }
+                       icon: "infinity", bigSize: 17, selected: work == 0) { work = 0 }
                 .padding(.top, 10)
 
             HStack(spacing: 8) {
@@ -227,14 +227,15 @@ private struct PickRow: View {
 private struct RhythmCard: View {
     let big: String, unit: String, sub: String
     var icon: String? = nil
+    var bigSize: CGFloat = 28
     let selected: Bool, action: () -> Void
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 14) {
-                if let icon { Image(systemName: icon).font(.system(size: 22, weight: .light)).frame(width: 30) }
+            HStack(spacing: 12) {
+                if let icon { Image(systemName: icon).font(.system(size: 15, weight: .light)).foregroundStyle(Ink.muted).frame(width: 22) }
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(alignment: .firstTextBaseline, spacing: 4) {
-                        Text(big).font(.system(size: 28, weight: .ultraLight))
+                        Text(big).font(.system(size: bigSize, weight: bigSize < 20 ? .regular : .ultraLight))
                         Text(unit).font(.system(size: 12)).foregroundStyle(Ink.muted)
                     }
                     Text(sub).font(.system(size: 11.5)).foregroundStyle(Ink.muted).lineLimit(1)
