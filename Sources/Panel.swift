@@ -411,6 +411,8 @@ private struct SessionsPage: View {
 private struct SessionRow: View {
     let session: Session, topic: Topic?, open: Bool, toggle: () -> Void
     @State private var hovering = false
+    @State private var editing = false
+    @State private var confirming = false
     var body: some View {
         let todos = Store.shared.todos(session: session.id)
         let done = todos.filter { $0.state == .done }.count
@@ -425,9 +427,23 @@ private struct SessionRow: View {
                     Text(meta).font(.system(size: 12)).foregroundStyle(Ink.muted).monospacedDigit()
                 }
                 Spacer()
+                Button { editing = true; if !open { toggle() } } label: { Image(systemName: "pencil").font(.system(size: 12)) }
+                    .buttonStyle(.plain).foregroundStyle(Ink.muted).opacity(hovering || editing ? 1 : 0).padding(.top, 3)
+                    .help(T("Kategoriyi, hedefi ve notu düzenle", "Edit category, goal and notes"))
+                Button { confirming = true } label: { Image(systemName: "trash").font(.system(size: 12)) }
+                    .buttonStyle(.plain).foregroundStyle(Ink.muted).opacity(hovering ? 1 : 0).padding(.top, 3)
+                    .help(T("Oturumu sil", "Delete session"))
+                    .confirmationDialog(T("Bu oturum silinsin mi? Süresi istatistiklerden düşer; görevleri günün listesinde kalır.",
+                                          "Delete this session? Its time leaves the stats; its tasks stay on the day's list."), isPresented: $confirming) {
+                        Button(T("Sil", "Delete"), role: .destructive) { Store.shared.deleteSession(id: session.id) }
+                    }
                 Text(formatMinutes(session.minutes)).font(.system(size: 15, weight: .light)).monospacedDigit()
             }
-            if open {
+            .contentShape(Rectangle())
+            .onTapGesture { if open { editing = false }; toggle() }   // açık alandaki alanlara tıklamak satırı kapatmasın
+            if open && editing {
+                SessionEditor(session: session) { editing = false }.padding(.leading, 30).padding(.top, 14)
+            } else if open {
                 VStack(alignment: .leading, spacing: 6) {
                     ForEach(todos) { t in
                         HStack(alignment: .top, spacing: 10) {
@@ -453,10 +469,43 @@ private struct SessionRow: View {
         .padding(.horizontal, 16).padding(.vertical, 14)
         .background(RoundedRectangle(cornerRadius: 14).fill(Color.white.opacity(open ? 0.06 : hovering ? 0.05 : 0.03)))
         .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(open ? Ink.line : .clear))
-        .contentShape(Rectangle())
-        .onTapGesture(perform: toggle)
         .onHover { hovering = $0 }
         .padding(.bottom, 6)
+    }
+}
+
+/// Oturumun kategorisini, hedefini ve notunu düzeltir; süren oturumda not ayrıntı panelinde zaten yazıldığından gizlenir.
+struct SessionEditor: View {
+    let session: Session
+    var showsNote = true
+    let done: () -> Void
+    @State private var topicID: Int64 = 0
+    @State private var goal = ""
+    @State private var note = ""
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 6) {
+                    ForEach(Store.shared.categories()) { t in FilterChip(title: t.name, topic: t, selected: topicID == t.id) { topicID = t.id } }
+                }
+            }
+            UnderlineField(placeholder: T("Hedef", "Goal"), text: $goal, onSubmit: save)
+            if showsNote { NotesEditor(text: $note) }
+            HStack(spacing: 8) {
+                Button(T("Vazgeç", "Cancel"), action: done).buttonStyle(SecondaryButtonStyle())
+                Button(T("Kaydet", "Save"), action: save).buttonStyle(PrimaryButtonStyle())
+            }
+        }
+        .onAppear { topicID = session.categoryID; goal = session.goal; note = session.note }
+    }
+
+    private func save() {
+        guard let topic = Store.shared.categories().first(where: { $0.id == topicID }) else { return }   // silinmiş kategori: önce yenisi seçilmeli
+        let g = goal.trimmingCharacters(in: .whitespaces)
+        if session.id == Focus.shared.session?.id { Focus.shared.retag(topic: topic, goal: g) }
+        else { Store.shared.updateSession(id: session.id, category: topic.id, goal: g.isEmpty ? topic.name : g, note: note) }
+        done()
     }
 }
 

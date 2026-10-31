@@ -123,6 +123,14 @@ final class Focus: ObservableObject {
         phase = .idle; session = nil; topic = nil; todos = []; restEnd = nil
     }
 
+    /// Süren oturumun kategorisini ve hedefini düzeltir.
+    func retag(topic: Topic, goal: String) {
+        guard var s = session else { return }
+        s.categoryID = topic.id; s.goal = goal.isEmpty ? topic.name : goal
+        Store.shared.updateSession(id: s.id, category: topic.id, goal: s.goal, note: note)
+        session = s; self.topic = topic
+    }
+
     /// Geliştirici kancası: kayıtta oturum biraz önce başlamış gibi görünsün.
     func debugShift(by seconds: TimeInterval) { session?.start.addTimeInterval(seconds); now = Date() }
 

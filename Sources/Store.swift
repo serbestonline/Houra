@@ -192,6 +192,19 @@ final class Store {
         run("UPDATE sessions SET note = ? WHERE id = ?", [.text(note), .int(session)])
     }
 
+    /// Yanlış açılmış oturumun kategorisini, hedefini ve notunu sonradan düzeltir.
+    func updateSession(id: Int64, category: Int64, goal: String, note: String) {
+        run("UPDATE sessions SET category_id = ?, goal = ?, note = ? WHERE id = ?", [.int(category), .text(goal), .text(note), .int(id)])
+        changed()
+    }
+
+    /// Oturumu siler; bağlı görevler günün listesinde kalır, yalnız oturumdan ayrılır.
+    func deleteSession(id: Int64) {
+        run("UPDATE todos SET session_id = NULL WHERE session_id = ?", [.int(id)])
+        run("DELETE FROM sessions WHERE id = ?", [.int(id)])
+        changed()
+    }
+
     func markEmergency(session: Int64) {
         run("UPDATE sessions SET emergency = 1 WHERE id = ?", [.int(session)])
         changed()

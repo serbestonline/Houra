@@ -10,6 +10,7 @@ struct DetailView: View {
     @ObservedObject private var focus = Focus.shared
     @State private var today: [Session] = []
     @State private var topics: [Int64: Topic] = [:]
+    @State private var editing = false
 
     var body: some View {
         Group {
@@ -31,8 +32,15 @@ struct DetailView: View {
                             .background(Capsule().fill(Color.white.opacity(0.06)))
                             .overlay(Capsule().strokeBorder(Ink.line))
                     }
+                    Button { editing.toggle() } label: { Image(systemName: "pencil").font(.system(size: 12)) }
+                        .buttonStyle(.plain).foregroundStyle(editing ? Ink.text : Ink.muted)
+                        .help(T("Kategoriyi ve hedefi düzelt", "Fix category and goal"))
                 }
-                Text(focus.session?.goal ?? "").font(.system(size: 21, weight: .medium)).padding(.top, 14)
+                if editing, let s = focus.session {
+                    SessionEditor(session: s, showsNote: false) { editing = false }.padding(.top, 14)
+                } else {
+                    Text(focus.session?.goal ?? "").font(.system(size: 21, weight: .medium)).padding(.top, 14)
+                }
                 Text(formatClock(focus.clock))
                     .font(.system(size: 68, weight: .ultraLight)).monospacedDigit().tracking(-2)
                     .padding(.top, 10)
