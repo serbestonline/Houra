@@ -46,13 +46,17 @@ gif() { # ad, genişlik, renk sayısı
         -vf "scale=$2:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=${3}:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle" \
         -loop 0 "assets/$1.gif"
 }
-for scenario in flow widgets snap stats rest; do
+for scenario in flow widgets snap stats rest rest-stretches stretches; do
     fresh
     "$APP" --record "$scenario" "$WORK/$scenario" "${WEEK[@]}"
 done
 gif flow 880 128; gif widgets 728 192; gif snap 960 192; gif stats 1000 192
 ffmpeg -y -loglevel error -framerate 12 -i "$WORK/rest/f%05d.png" \
     -vf "fps=8,scale=720:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=48[p];[b][p]paletteuse=dither=bayer:bayer_scale=5" -loop 0 assets/rest.gif
+ffmpeg -y -loglevel error -framerate 12 -i "$WORK/rest-stretches/f%05d.png" \
+    -vf "fps=8,scale=720:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=64[p];[b][p]paletteuse=dither=bayer:bayer_scale=5" -loop 0 assets/rest-stretches.gif
+ffmpeg -y -loglevel error -framerate 12 -i "$WORK/stretches/f%05d.png" \
+    -vf "fps=10,scale=900:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=128:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle" -loop 0 assets/stretches.gif
 
 rm -rf "$WORK"
 echo "Görseller assets/ altında yenilendi."

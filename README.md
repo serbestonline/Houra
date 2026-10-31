@@ -19,11 +19,12 @@
 
 ---
 
-Houra is a focus timer built around three ideas:
+Houra is a focus timer built around four ideas:
 
 1. **Decide before you start.** Every session begins with a category, a goal and, if you want, a short to-do list picked from today's tasks. Once the session runs, the list is locked: you finish what you planned instead of adding more.
 2. **Keep time in sight without a window in the way.** A small tag, strip, capsule, card or ring floats at the edge of your screen. Hover over it and the full session slides out; move away and it hides again.
 3. **Really take the break.** When the time is up, a full-screen break covers every display. It only lets you back in early through a deliberate, press-and-hold *Emergency* button.
+4. **Move while you're away.** The break screen, and a window you can open any time, guide you through 23 stretches for the lower back, neck, shoulders and wrists, each shown as a looping animation.
 
 Everything stays on your Mac in a local SQLite file. There is no account, no sync and no tracking.
 
@@ -34,6 +35,7 @@ Everything stays on your Mac in a local SQLite file. There is no account, no syn
 - [Sessions](#sessions)
 - [On-screen views](#on-screen-views)
 - [Break screen](#break-screen)
+- [Stretches](#stretches)
 - [Statistics](#statistics)
 - [Today, sessions and categories](#today-sessions-and-categories)
 - [Installation](#installation)
@@ -97,9 +99,27 @@ While a session runs, Houra shows the remaining time and the task you are on in 
 
 When the focus time ends, or when you press *Finish*, a slow black-and-white scene covers every screen with the break countdown. App switching is blocked on purpose.
 
-Press *Stretches* and the timer slides aside for a guided set of moves in five groups: general, lower back, neck and back, arms and wrists, and left shoulder. Each move plays as a looping animation with the suggested sets and reps. The same moves open from the panel sidebar and the menu bar outside a break too.
-
 If something really cannot wait, **press and hold *Emergency* for 1.5 seconds**. The break keeps running in the menu bar, the early exit is recorded, and you can return to the break from the menu. When the break ends, Houra asks about your next session.
+
+## Stretches
+
+23 moves for the body that sits at a desk all day, in five groups: **General**, **Lower back**, **Neck and back**, **Arms and wrists** and **Left shoulder**. Each move plays as a looping animation of a real person, with a short how-to and the suggested amount, for example *2 sets × hold 20 s each side*. There is no counter to tick off; the arrows move between moves. The animations were made for Houra in Blender.
+
+### On the break screen
+
+<p align="center">
+  <img src="assets/rest-stretches.gif" width="720" alt="Opening the stretches on the break screen">
+</p>
+
+Press *Stretches* under the countdown. The timer slides to the right and the moves appear on the left; the break keeps counting down while you stretch. Press *Hide stretches* to go back.
+
+### Any time
+
+<p align="center">
+  <img src="assets/stretches.gif" width="900" alt="The stretches window opened from the panel">
+</p>
+
+You don't have to wait for a break. Open the same moves in their own window from **Stretches** in the panel sidebar or **Stretches…** in the menu bar.
 
 ## Statistics
 

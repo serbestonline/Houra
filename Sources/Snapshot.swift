@@ -3,7 +3,7 @@ import AppKit
 // Geliştirici aracı: README görselleri ve GIF kareleri. Uygulama kendi pencerelerinin görüntüsünü
 // izinsiz alabildiği için ekran kaydı izni gerekmez. Senaryolar sahte bir masaüstü zemininde birleştirilir.
 //   HOURA_DB=demo.sqlite Houra --snapshot <klasör>             durağan ekran görüntüleri
-//   HOURA_DB=demo.sqlite Houra --record <senaryo> <klasör>      kareler (flow, widgets, stats, rest; stretch tek görüntü)
+//   HOURA_DB=demo.sqlite Houra --record <senaryo> <klasör>      kareler (flow, widgets, stats, rest, rest-stretches, stretches; stretch tek görüntü)
 
 enum Snapshot {
     private typealias WindowImageFn = @convention(c) (CGRect, UInt32, UInt32, UInt32) -> Unmanaged<CGImage>?
@@ -143,6 +143,7 @@ enum Snapshot {
             Focus.shared.debugShift(by: -16 * 60)   // 16 dakika önce başlamış gibi
         }
         let stats = { (info: [String: Any]) in NotificationCenter.default.post(name: .statsCommand, object: nil, userInfo: info) }
+        let stretch = { (info: [String: Any]) in NotificationCenter.default.post(name: .stretchCommand, object: nil, userInfo: info) }
 
         switch scenario {
         case "stats":
@@ -205,10 +206,29 @@ enum Snapshot {
         case "rest":
             startDemoSession()
             let rec = Recorder(dir: dir) { NSApp.windows.first { $0 is KeyWindow && $0.level == .screenSaver && $0.screen == screen }.flatMap { composite([$0], canvas: $0.frame, scale: 0.5, desktop: false) } }
-            let stretch = { NotificationCenter.default.post(name: .stretchCommand, object: nil) }
-            run([(0.5, { Focus.shared.finish() }), (0.2, { rec.start() }), (3.5, stretch), (6.0, stretch), (2.0, { rec.stop() })]) {
+            run([(0.5, { Focus.shared.finish() }), (0.2, { rec.start() }), (6.0, { rec.stop() })]) {
                 RestOverlay.shared.hide(); NSApp.terminate(nil)
             }
+
+        case "rest-stretches":   // molada esneme hareketlerini açıp birkaç hareket gezer
+            startDemoSession()
+            let rec = Recorder(dir: dir) { NSApp.windows.first { $0 is KeyWindow && $0.level == .screenSaver && $0.screen == screen }.flatMap { composite([$0], canvas: $0.frame, scale: 0.5, desktop: false) } }
+            run([(0.5, { Focus.shared.finish() }), (0.2, { rec.start() }), (1.8, { stretch(["toggle": true]) }), (3.6, { stretch(["next": true]) }),
+                 (3.0, { stretch(["group": 1]) }), (3.6, { stretch(["toggle": true]) }), (1.8, { rec.stop() })]) {
+                RestOverlay.shared.hide(); NSApp.terminate(nil)
+            }
+
+        case "stretches":   // moladan bağımsız: panelin kenar çubuğundan açılan esneme penceresi
+            let panel = PanelController.shared
+            panel.show(page: .today)
+            let stretchWindow = { NSApp.windows.first { $0.isVisible && $0.frame.size == NSSize(width: 640, height: 820) } }
+            let rec = Recorder(dir: dir) {
+                let ws = [panelWindow(), stretchWindow()].compactMap { $0 }
+                let canvas = ws.reduce(NSRect.null) { $0.union($1.frame) }.insetBy(dx: -40, dy: -40)
+                return composite(ws, canvas: canvas, scale: 1)
+            }
+            run([(1.0, { rec.start() }), (1.2, { StretchWindow.shared.show() }), (3.4, { stretch(["next": true]) }),
+                 (3.2, { stretch(["group": 3]) }), (3.4, { stretch(["next": true]) }), (3.2, { rec.stop() })]) { NSApp.terminate(nil) }
 
         case "stretch":   // esneme penceresinin tek bir görüntüsü
             let w = { NSApp.windows.first { $0.isVisible && $0.frame.size == NSSize(width: 640, height: 820) } }

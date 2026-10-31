@@ -19,11 +19,12 @@
 
 ---
 
-Houra üç fikir üzerine kurulu:
+Houra dört fikir üzerine kurulu:
 
 1. **Başlamadan karar ver.** Her oturum bir kategori, bir hedef ve istersen bugünün listesinden seçilmiş kısa bir yapılacaklar listesiyle başlar. Oturum başlayınca liste kilitlenir: yeni iş eklemek yerine planladığını bitirirsin.
 2. **Süre görünsün ama önüne pencere çıkmasın.** Ekranın kenarında küçük bir etiket, şerit, kapsül, kart ya da halka durur. Üzerine gelince oturumun tamamı açılır, uzaklaşınca kapanır.
 3. **Molayı gerçekten ver.** Süre dolunca bütün ekranları tam ekran bir mola kaplar. Erken dönmenin tek yolu, bilerek basılı tutulan *Acil durum* düğmesidir.
+4. **Uzaklaşınca hareket et.** Mola ekranı ve istediğin zaman açabildiğin bir pencere, bel, boyun, omuz ve bilek için 23 esneme hareketini döngüyle oynayan animasyonlarla gösterir.
 
 Her şey Mac'inde, yerel bir SQLite dosyasında durur. Hesap, senkronizasyon ya da izleme yoktur.
 
@@ -85,9 +86,27 @@ Görünümün **üzerine gelip kısa bir süre bekleyince** ayrıntı paneli aç
 
 Odak süresi dolunca ya da *Bitir*'e basınca bütün ekranları yavaşça akan siyah-beyaz bir sahne ve mola geri sayımı kaplar. Uygulamalar arasında geçiş bilerek kapalıdır.
 
-*Esneme hareketleri*ne basınca sayaç yana kayar ve beş grupta hareketler gelir: genel, bel, boyun ve sırt, kol ve bilek, sol omuz. Her hareket döngüyle oynayan bir animasyon ve önerilen set ile tekrar sayısıyla gösterilir. Aynı hareketler molanın dışında da panelin kenar çubuğundan ve menü çubuğundan açılır.
-
 Bir şey gerçekten bekleyemiyorsa **Acil durum düğmesini 1,5 saniye basılı tut**. Mola menü çubuğunda sürer, erken dönüş kaydedilir, menüden molaya geri dönebilirsin. Mola bitince Houra bir sonraki oturumu sorar.
+
+## Esneme hareketleri
+
+Bütün gün masa başında oturan beden için 23 hareket, beş grupta: **Genel**, **Bel**, **Boyun ve sırt**, **Kol ve bilek** ve **Sol omuz**. Her hareket gerçek bir insanın döngüyle oynayan animasyonu, kısa bir tarif ve önerilen miktarla gösterilir; örneğin *2 set × her yanda 20 sn tut*. İşaretlenecek bir sayaç yok, hareketler arasında oklarla geçilir. Animasyonlar Houra için Blender'da üretildi.
+
+### Mola ekranında
+
+<p align="center">
+  <img src="assets/rest-stretches.gif" width="720" alt="Mola ekranında esneme hareketlerini açmak">
+</p>
+
+Geri sayımın altındaki *Esneme hareketleri*ne bas. Sayaç sağa kayar, hareketler solda belirir; sen esnerken mola saymaya devam eder. *Hareketleri kapat* ile geri dönersin.
+
+### İstediğin zaman
+
+<p align="center">
+  <img src="assets/stretches.gif" width="900" alt="Panelden açılan esneme penceresi">
+</p>
+
+Molayı beklemen gerekmez. Aynı hareketleri kendi penceresinde, panelin kenar çubuğundaki **Esneme hareketleri**nden ya da menü çubuğundaki **Esneme hareketleri…** ile açarsın.
 
 ## İstatistik
 

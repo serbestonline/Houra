@@ -79,7 +79,7 @@ private struct RestView: View {
         }
         .ignoresSafeArea()
         .onAppear { shown = true }
-        .onReceive(NotificationCenter.default.publisher(for: .stretchCommand)) { _ in stretching.toggle() }
+        .onReceive(NotificationCenter.default.publisher(for: .stretchCommand)) { n in if n.userInfo?["toggle"] != nil { stretching.toggle() } }
     }
 
     private var timer: some View {
@@ -366,6 +366,10 @@ struct StretchGuide: View {
                 .padding(.top, 26)
             }
             .foregroundStyle(Ink.text)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .stretchCommand)) { n in
+            if n.userInfo?["next"] != nil { go(index + 1) }
+            if let g = n.userInfo?["group"] as? Int { group = g; go(0) }
         }
     }
 
