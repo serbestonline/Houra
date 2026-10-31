@@ -1,16 +1,28 @@
-MIT License
+Houra License
 
-Copyright (c) 2026 Serbest
+Copyright (c) 2026 Serbest. All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This repository, including the source code, the app built from it, the
+stretch animations and all other media (together, "the Software"), is
+made public so it can be read. It is not open source.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+You may:
+- read the source code;
+- build the Software and install it on your own computers for your own
+  personal, non-commercial use.
+
+You may not, without prior written permission from the copyright holder:
+- copy, publish, distribute, sublicense or sell the Software, in whole or
+  in part, in source or binary form, including the stretch animations;
+- modify the Software, or publish or distribute modified versions or
+  works derived from it;
+- use the Software, or any part of it, for any commercial purpose,
+  including inside a business, in a paid product or service, or to
+  provide a service to others.
+
+Versions of the Software released before this license took effect were
+published under the MIT License, and that license continues to apply to
+those versions only.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -19,3 +31,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+For permission requests, open an issue at
+https://github.com/serbestonline/Houra.

@@ -92,6 +92,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(.separator())
         menu.addItem(submenu(T("Ekranda göster", "Show on screen"), viewsMenu()))
         menu.addItem(item(T("Paneli aç…", "Open panel…"), key: "p") { PanelController.shared.show() })
+        menu.addItem(item(T("Esneme hareketleri…", "Stretches…")) { StretchWindow.shared.show() })
         menu.addItem(.separator())
         menu.addItem(item(T("Açılışta başlat", "Launch at login"), checked: SMAppService.mainApp.status == .enabled) { [weak self] in self?.toggleLoginItem() })
         menu.addItem(item(T("Ayarlar…", "Settings…"), key: ",") { PanelController.shared.show(page: .settings) })

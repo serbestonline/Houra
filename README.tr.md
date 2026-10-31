@@ -189,6 +189,8 @@ Kod `Sources/` altında düz Swift'tir (AppKit + SwiftUI). Kendi testini `build/
 
 - İkonlar: [Phosphor Icons](https://phosphoricons.com) (MIT), [Iconify](https://iconify.design) üzerinden.
 
+- Esneme animasyonları: [Blender](https://www.blender.org)'da [MPFB](https://static.makehumancommunity.org/mpfb.html) ve onun CC0 varlıklarıyla üretildi (`Studio/esneme.py`).
+
 ## Lisans
 
-MIT
+Tüm hakları saklıdır. Kaynak kod okunmak için açık; Houra'yı kendi kişisel ve ticari olmayan kullanımın için derleyip kullanabilirsin. Kopyalamak, dağıtmak, değiştirmek ya da ticari amaçla kullanmak yazılı izin olmadan yasaktır. Ayrıntı: [LICENSE](LICENSE).

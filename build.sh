@@ -82,6 +82,7 @@ rm -rf "$APP" "$ICONSET"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$ICONSET"
 build_binary
 build_icon
+cp -R Stretches "$APP/Contents/Resources/"
 write_info_plist
 codesign --force --sign - "$APP"
 echo "Derlendi: $APP ($VERSION)"

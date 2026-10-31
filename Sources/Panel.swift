@@ -92,6 +92,17 @@ private struct Sidebar: View {
             nav(.stats, "chart.bar.xaxis", T("İstatistik", "Statistics"))
             nav(.sessions, "list.bullet", T("Oturumlar", "Sessions"))
             nav(.categories, "square.grid.2x2", T("Kategoriler", "Categories"))
+            Button { StretchWindow.shared.show() } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: "figure.arms.open").font(.system(size: 13)).frame(width: 18).foregroundStyle(Ink.muted)
+                    Text(T("Esneme hareketleri", "Stretches")).font(.system(size: 13.5))
+                    Spacer()
+                }
+                .padding(.horizontal, 12).frame(height: 34)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(Ink.text.opacity(0.75))
             Spacer()
             nav(.settings, "gearshape", T("Ayarlar", "Settings"))
             Button { NewSessionController.shared.show() } label: {

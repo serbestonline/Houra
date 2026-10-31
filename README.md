@@ -214,8 +214,9 @@ The screenshots and GIFs in this README are produced by the app itself on sample
 ## Credits
 
 - Icons: [Phosphor Icons](https://phosphoricons.com) (MIT), fetched through [Iconify](https://iconify.design).
+- Stretch animations: made in [Blender](https://www.blender.org) with [MPFB](https://static.makehumancommunity.org/mpfb.html) and its CC0 assets (`Studio/esneme.py`).
 - Made by [Serbest](https://github.com/serbestonline).
 
 ## License
 
-MIT
+All rights reserved. The source is public to read, and you may build and use Houra for your own personal, non-commercial use. Copying, distributing, modifying or using it commercially is not allowed without written permission. See [LICENSE](LICENSE).
