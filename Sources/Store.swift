@@ -48,6 +48,7 @@ extension Notification.Name {
     static let storeChanged = Notification.Name("HouraStoreChanged")
     /// Geliştirici kancası: kayıt betiği istatistik sayfasını yönetir (userInfo: chart, period, filter, open, close, hover).
     static let statsCommand = Notification.Name("HouraStatsCommand")
+    static let stretchCommand = Notification.Name("HouraStretchCommand")   // README kaydı: molada esnemeyi aç
     /// Geliştirici kancası: kategori seçicisini açar (userInfo: tab).
     static let pickerCommand = Notification.Name("HouraPickerCommand")
 }

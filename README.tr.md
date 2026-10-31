@@ -85,6 +85,8 @@ Görünümün **üzerine gelip kısa bir süre bekleyince** ayrıntı paneli aç
 
 Odak süresi dolunca ya da *Bitir*'e basınca bütün ekranları yavaşça akan siyah-beyaz bir sahne ve mola geri sayımı kaplar. Uygulamalar arasında geçiş bilerek kapalıdır.
 
+*Esneme hareketleri*ne basınca sayaç yana kayar ve beş grupta hareketler gelir: genel, bel, boyun ve sırt, kol ve bilek, sol omuz. Her hareket döngüyle oynayan bir animasyon ve önerilen set ile tekrar sayısıyla gösterilir. Aynı hareketler molanın dışında da panelin kenar çubuğundan ve menü çubuğundan açılır.
+
 Bir şey gerçekten bekleyemiyorsa **Acil durum düğmesini 1,5 saniye basılı tut**. Mola menü çubuğunda sürer, erken dönüş kaydedilir, menüden molaya geri dönebilirsin. Mola bitince Houra bir sonraki oturumu sorar.
 
 ## İstatistik

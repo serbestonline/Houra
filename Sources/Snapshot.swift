@@ -3,7 +3,7 @@ import AppKit
 // Geliştirici aracı: README görselleri ve GIF kareleri. Uygulama kendi pencerelerinin görüntüsünü
 // izinsiz alabildiği için ekran kaydı izni gerekmez. Senaryolar sahte bir masaüstü zemininde birleştirilir.
 //   HOURA_DB=demo.sqlite Houra --snapshot <klasör>             durağan ekran görüntüleri
-//   HOURA_DB=demo.sqlite Houra --record <senaryo> <klasör>      kareler (flow, widgets, stats, rest)
+//   HOURA_DB=demo.sqlite Houra --record <senaryo> <klasör>      kareler (flow, widgets, stats, rest; stretch tek görüntü)
 
 enum Snapshot {
     private typealias WindowImageFn = @convention(c) (CGRect, UInt32, UInt32, UInt32) -> Unmanaged<CGImage>?
@@ -205,9 +205,14 @@ enum Snapshot {
         case "rest":
             startDemoSession()
             let rec = Recorder(dir: dir) { NSApp.windows.first { $0 is KeyWindow && $0.level == .screenSaver && $0.screen == screen }.flatMap { composite([$0], canvas: $0.frame, scale: 0.5, desktop: false) } }
-            run([(0.5, { Focus.shared.finish() }), (0.2, { rec.start() }), (6.0, { rec.stop() })]) {
+            let stretch = { NotificationCenter.default.post(name: .stretchCommand, object: nil) }
+            run([(0.5, { Focus.shared.finish() }), (0.2, { rec.start() }), (3.5, stretch), (6.0, stretch), (2.0, { rec.stop() })]) {
                 RestOverlay.shared.hide(); NSApp.terminate(nil)
             }
+
+        case "stretch":   // esneme penceresinin tek bir görüntüsü
+            let w = { NSApp.windows.first { $0.isVisible && $0.frame.size == NSSize(width: 640, height: 820) } }
+            run([(0.2, { StretchWindow.shared.show() }), (2.0, { capture(w(), to: "\(dir)/stretch.png") })]) { NSApp.terminate(nil) }
 
         default:
             NSApp.terminate(nil)

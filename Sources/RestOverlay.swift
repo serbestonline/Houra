@@ -79,6 +79,7 @@ private struct RestView: View {
         }
         .ignoresSafeArea()
         .onAppear { shown = true }
+        .onReceive(NotificationCenter.default.publisher(for: .stretchCommand)) { _ in stretching.toggle() }
     }
 
     private var timer: some View {
@@ -326,12 +327,11 @@ struct StretchScreen: View {
     }
 }
 
-/// Mola ekranının sol yarısı ve esneme penceresi. Sayaç yok: her hareketin set ve tekrar sayısı yazar,
-/// "Set bitti" ile ilerlenir, son set bitince sıradaki harekete geçilir.
+/// Mola ekranının sol yarısı ve esneme penceresi. Sayaç ve set takibi yok: her hareketin önerilen set ve
+/// tekrar sayısı yazar, oklarla hareketler arasında geçilir.
 struct StretchGuide: View {
     @State private var group = 0
     @State private var index = 0
-    @State private var done = 0          // bu harekette biten set
     @State private var since = Date()    // animasyon hareketin başından oynasın
 
     var body: some View {
@@ -355,28 +355,12 @@ struct StretchGuide: View {
                 }
                 Eyebrow("\(i + 1) / \(count)").padding(.top, 28)
                 Text(move.name).font(.system(size: 38, weight: .light)).tracking(-0.5).padding(.top, 12)
-                Text(T("\(move.sets) set × \(move.dose)", "\(move.sets) sets × \(move.dose)"))
+                Text(T("Önerilen: \(move.sets) set × \(move.dose)", "Suggested: \(move.sets) sets × \(move.dose)"))
                     .font(.system(size: 15, weight: .medium)).monospacedDigit().padding(.top, 8)
                 Text(move.hint).font(.system(size: 16)).foregroundStyle(Ink.muted)
                     .multilineTextAlignment(.center).frame(width: 380).padding(.top, 10)
                 HStack(spacing: 18) {
                     step("chevron.left") { go((i + count - 1) % count) }
-                    Button { if done + 1 >= move.sets { go((i + 1) % count) } else { done += 1 } } label: {
-                        HStack(spacing: 10) {
-                            HStack(spacing: 5) {
-                                ForEach(0..<move.sets, id: \.self) { k in
-                                    Circle().fill(Color.white.opacity(k < done ? 0.9 : 0.18)).frame(width: 7, height: 7)
-                                }
-                            }
-                            Text(done + 1 >= move.sets ? T("Son set bitti", "Last set done") : T("\(done + 1). set bitti", "Set \(done + 1) done"))
-                                .font(.system(size: 13, weight: .medium))
-                        }
-                        .padding(.horizontal, 18).padding(.vertical, 10)
-                        .background(Capsule().fill(Color.white.opacity(0.08)))
-                        .overlay(Capsule().strokeBorder(Color.white.opacity(0.2)))
-                        .contentShape(Capsule())
-                    }
-                    .buttonStyle(.plain)
                     step("chevron.right") { go((i + 1) % count) }
                 }
                 .padding(.top, 26)
@@ -385,7 +369,7 @@ struct StretchGuide: View {
         }
     }
 
-    private func go(_ n: Int) { index = n; done = 0; since = Date() }
+    private func go(_ n: Int) { index = n; since = Date() }
 
     private func step(_ symbol: String, _ action: @escaping () -> Void) -> some View {
         Button(action: action) {

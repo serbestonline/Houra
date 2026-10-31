@@ -97,6 +97,8 @@ While a session runs, Houra shows the remaining time and the task you are on in 
 
 When the focus time ends, or when you press *Finish*, a slow black-and-white scene covers every screen with the break countdown. App switching is blocked on purpose.
 
+Press *Stretches* and the timer slides aside for a guided set of moves in five groups: general, lower back, neck and back, arms and wrists, and left shoulder. Each move plays as a looping animation with the suggested sets and reps. The same moves open from the panel sidebar and the menu bar outside a break too.
+
 If something really cannot wait, **press and hold *Emergency* for 1.5 seconds**. The break keeps running in the menu bar, the early exit is recorded, and you can return to the break from the menu. When the break ends, Houra asks about your next session.
 
 ## Statistics
