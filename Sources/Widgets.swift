@@ -89,15 +89,22 @@ final class Widgets: ObservableObject {
     }
 
     private var compactSize: NSSize {
+        let p = 2 * shadowPad
         switch style {
-        case .tag: return NSSize(width: 300, height: 92)
+        case .tag: return NSSize(width: 300 + p, height: 92 + p)
         case .strip: return NSSize(width: 260, height: (screen?.visibleFrame.height ?? 800))
-        case .capsule: return NSSize(width: 372, height: 96)
-        case .card: return NSSize(width: 250, height: 290)
-        case .ring: return NSSize(width: 116, height: 116)
+        case .capsule: return NSSize(width: 372 + p, height: 96 + p)
+        case .card: return NSSize(width: 250 + p, height: 290 + p)
+        case .ring: return NSSize(width: 116 + p, height: 116 + p)
         case .none: return .zero
         }
     }
+
+    /// Gölge pencerenin kenarında kesilince saydam zeminde gri bir kutu gibi görünüyordu;
+    /// görünümün çevresinde gölgenin sığacağı kadar boşluk bırakılır.
+    private var shadowPad: CGFloat { style == .strip ? 0 : 36 }
+    /// Pencerenin, gölge boşluğu çıkarılmış görünen kısmı.
+    private var visibleCompactFrame: NSRect { (compact?.frame ?? .zero).insetBy(dx: shadowPad, dy: shadowPad) }
 
     private var screen: NSScreen? { compact?.screen ?? NSScreen.screens.first }   // ana ekran: menü çubuğunun olduğu
 
@@ -107,15 +114,15 @@ final class Widgets: ObservableObject {
         case .strip:
             return NSRect(x: onLeft ? vf.minX : vf.maxX - size.width, y: vf.minY, width: size.width, height: vf.height)
         case .tag:
-            let y = UserDefaults.standard.object(forKey: "tagY") as? Double ?? Double(vf.maxY - 300)
-            return NSRect(x: onLeft ? vf.minX : vf.maxX - size.width, y: min(max(vf.minY, y), vf.maxY - size.height), width: size.width, height: size.height)
+            let y = (UserDefaults.standard.object(forKey: "tagY") as? Double ?? Double(vf.maxY - 300)) - shadowPad
+            return NSRect(x: onLeft ? vf.minX : vf.maxX - size.width, y: min(max(vf.minY - shadowPad, y), vf.maxY - size.height + shadowPad), width: size.width, height: size.height)
         default:
             let key = "pos.\(style.rawValue)"
             if let s = UserDefaults.standard.string(forKey: key) {
-                let o = NSPointFromString(s)
-                if NSScreen.screens.contains(where: { $0.frame.contains(NSPoint(x: o.x + 20, y: o.y + 20)) }) { return NSRect(origin: o, size: size) }
+                let saved = NSPointFromString(s), o = NSPoint(x: saved.x - shadowPad, y: saved.y - shadowPad)
+                if NSScreen.screens.contains(where: { $0.frame.contains(NSPoint(x: saved.x + 20, y: saved.y + 20)) }) { return NSRect(origin: o, size: size) }
             }
-            return NSRect(x: vf.maxX - size.width - 30, y: vf.maxY - size.height - 30, width: size.width, height: size.height)
+            return NSRect(x: vf.maxX - size.width - 30 + shadowPad, y: vf.maxY - size.height - 30 + shadowPad, width: size.width, height: size.height)
         }
     }
 
@@ -136,7 +143,7 @@ final class Widgets: ObservableObject {
         let fit = NSHostingView(rootView: DetailCard(vertical: vertical, edgeLeft: nil, scrolls: false)).fittingSize
         let height = vertical ? vf.height : min(fit.height, vf.height - 24)
         var frame = NSRect(x: 0, y: 0, width: vertical ? 380 : 360, height: height)
-        let c = compact.frame
+        let c = visibleCompactFrame
         switch style {
         case .strip:
             frame.origin = NSPoint(x: onLeft ? vf.minX : vf.maxX - frame.width, y: vf.minY)
@@ -162,7 +169,7 @@ final class Widgets: ObservableObject {
     private func watchMouse() {
         guard let detail else { return }
         let m = NSEvent.mouseLocation
-        let inside = detail.frame.insetBy(dx: -8, dy: -8).contains(m) || (compact?.frame.insetBy(dx: -4, dy: -4).contains(m) ?? false)
+        let inside = detail.frame.insetBy(dx: -8, dy: -8).contains(m) || (compact != nil && visibleCompactFrame.insetBy(dx: -4, dy: -4).contains(m))
         let typing = detail.isKeyWindow && (detail.firstResponder is NSTextView)
         if inside || typing || NSEvent.pressedMouseButtons != 0 { outsideSince = nil; return }
         if outsideSince == nil { outsideSince = Date() }
@@ -199,7 +206,7 @@ final class Widgets: ObservableObject {
     }
 
     private var nudgeSize: NSSize {
-        style == .strip || style == .card ? compactSize : NSSize(width: max(compactSize.width, 270), height: 186)
+        style == .strip || style == .card ? compactSize : NSSize(width: max(compactSize.width, 270 + 2 * shadowPad), height: 186 + 2 * shadowPad)
     }
 
     /// Üst kenarı ve yapıştığı yanı yerinde tutarak boyutu değiştirir.
@@ -234,15 +241,15 @@ final class Widgets: ObservableObject {
             onLeft = f.midX < vf.midX
             var target = f
             target.origin.x = onLeft ? vf.minX : vf.maxX - f.width
-            target.origin.y = style == .strip ? vf.minY : min(max(vf.minY, f.origin.y), vf.maxY - f.height)
-            if style == .tag { UserDefaults.standard.set(Double(target.origin.y), forKey: "tagY") }
+            target.origin.y = style == .strip ? vf.minY : min(max(vf.minY - shadowPad, f.origin.y), vf.maxY - f.height + shadowPad)
+            if style == .tag { UserDefaults.standard.set(Double(target.origin.y + shadowPad), forKey: "tagY") }
             NSAnimationContext.runAnimationGroup { c in
                 c.duration = 0.45
                 c.timingFunction = CAMediaTimingFunction(controlPoints: 0.22, 1, 0.36, 1)
                 compact.animator().setFrame(target, display: true)
             }
         } else {
-            UserDefaults.standard.set(NSStringFromPoint(f.origin), forKey: "pos.\(style.rawValue)")
+            UserDefaults.standard.set(NSStringFromPoint(NSPoint(x: f.minX + shadowPad, y: f.minY + shadowPad)), forKey: "pos.\(style.rawValue)")
         }
     }
 }
@@ -303,7 +310,6 @@ private struct CompactView: View {
             .opacity(widgets.detailOpen && style != .strip ? 0 : 1)
             .scaleEffect(widgets.detailOpen && style != .strip ? 0.9 : 1)
             .animation(.spring(response: 0.4, dampingFraction: 0.85), value: widgets.detailOpen)
-            .onHover { widgets.hover($0) }
             .gesture(DragGesture(minimumDistance: 3, coordinateSpace: .global)
                 .onChanged { _ in widgets.dragChanged() }
                 .onEnded { _ in widgets.dragEnded() })
@@ -356,6 +362,7 @@ private struct CompactView: View {
         .overlay(SideRoundedRect(radius: 18, flatLeft: left, flatRight: !left).strokeBorder(Ink.line))
         .clipShape(SideRoundedRect(radius: 18, flatLeft: left, flatRight: !left))
         .shadow(color: .black.opacity(0.35), radius: 16, x: left ? 8 : -8, y: 10)
+        .onHover { widgets.hover($0) }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: left ? .leading : .trailing)
     }
 
@@ -382,6 +389,7 @@ private struct CompactView: View {
         .background(shape.fill(Ink.glass))
         .overlay(shape.strokeBorder(Ink.line))
         .shadow(color: .black.opacity(0.4), radius: 16, x: edge ? (left ? 8 : -8) : 0, y: 10)
+        .onHover { widgets.hover($0) }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: edge ? (left ? .leading : .trailing) : .center)
     }
 
@@ -393,6 +401,9 @@ private struct CompactView: View {
         return GeometryReader { g in
             ZStack(alignment: left ? .bottomLeading : .bottomTrailing) {
                 Rectangle().fill(Color.white.opacity(0.06)).frame(width: 5)
+                    .padding(left ? .trailing : .leading, 7)   // şeridin üzerine gelmek kolay olsun diye 12 noktalık alan
+                    .contentShape(Rectangle())
+                    .onHover { widgets.hover($0) }
                 Rectangle().fill(LinearGradient(colors: [Color(white: 0.96), Color(white: 0.7)], startPoint: .top, endPoint: .bottom))
                     .frame(width: 5, height: g.size.height * focus.progress)
                     .shadow(color: .white.opacity(0.35), radius: 8)
@@ -403,6 +414,7 @@ private struct CompactView: View {
                 .padding(.horizontal, 11).padding(.vertical, 7)
                 .background(RoundedRectangle(cornerRadius: 10).fill(Ink.glass))
                 .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Ink.line))
+                .onHover { widgets.hover($0) }
                 .padding(left ? .leading : .trailing, 14)
                 .offset(y: -(g.size.height * focus.progress) + 20)
                 .opacity(widgets.detailOpen ? 0 : 1)
@@ -440,6 +452,7 @@ private struct CompactView: View {
         .background(Capsule().fill(Ink.glass))
         .overlay(Capsule().strokeBorder(Ink.line))
         .shadow(color: .black.opacity(0.45), radius: 18, y: 10)
+        .onHover { widgets.hover($0) }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
@@ -459,6 +472,7 @@ private struct CompactView: View {
         .background(RoundedRectangle(cornerRadius: 30, style: .continuous).fill(Ink.glass))
         .overlay(RoundedRectangle(cornerRadius: 30, style: .continuous).strokeBorder(Ink.line))
         .shadow(color: .black.opacity(0.5), radius: 22, y: 12)
+        .onHover { widgets.hover($0) }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
@@ -473,6 +487,7 @@ private struct CompactView: View {
         }
         .frame(width: 80, height: 80)
         .shadow(color: .black.opacity(0.4), radius: 16, y: 10)
+        .onHover { widgets.hover($0) }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

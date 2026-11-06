@@ -44,6 +44,7 @@ private struct NewSessionView: View {
     let close: () -> Void
 
     @State private var topics = Store.shared.categories()
+    private let last = Store.shared.lastSession()
     @State private var topicID: Int64? = NewSessionController.preselect?.topicID ?? UserDefaults.standard.object(forKey: "lastTopic") as? Int64
     @State private var goal = NewSessionController.prefillGoal
     @State private var waiting = Store.shared.todos(day: dayKey(Date())).filter { $0.state != .done && $0.sessionID == nil }
@@ -62,7 +63,24 @@ private struct NewSessionView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Eyebrow(T("Yeni oturum", "New session"))
+            HStack {
+                Eyebrow(T("Yeni oturum", "New session"))
+                Spacer()
+                if let last, let t = topics.first(where: { $0.id == last.categoryID }) {
+                    Button { repeatLast(last, topic: t) } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: "arrow.counterclockwise").font(.system(size: 10, weight: .semibold))
+                            Text(T("Öncekini tekrarla", "Repeat last"))
+                        }
+                        .font(.system(size: 11.5, weight: .medium)).foregroundStyle(Ink.muted)
+                        .padding(.horizontal, 10).padding(.vertical, 4)
+                        .background(Capsule().fill(Color.white.opacity(0.05)))
+                        .overlay(Capsule().strokeBorder(Ink.line))
+                    }
+                    .buttonStyle(.plain)
+                    .help("\(t.name) · \(last.goal) · \(last.rhythm)")
+                }
+            }
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 6) {
                     ForEach(topics) { t in
@@ -88,7 +106,7 @@ private struct NewSessionView: View {
                     if weekly.isEmpty {
                         Eyebrow(T("Bugünün listesinden seç", "Pick from today's list"))
                     } else {
-                        Segmented(options: [T("Bugünün listesi", "Today's list"), T("Haftanın listesi", "This week's list")], selection: source) { source = $0 }
+                        Segmented(options: [T("Bugünün listesi", "Today's list"), T("Haftanın listesi (Obsidian)", "This week's list (Obsidian)")], selection: source) { source = $0 }
                     }
                     Spacer()
                     let n = picked.count + pickedWeekly.count + extra.count
@@ -174,6 +192,14 @@ private struct NewSessionView: View {
         guard !t.isEmpty else { return }
         extra.append((t, newDetail.trimmingCharacters(in: .whitespaces)))
         newTitle = ""; newDetail = ""
+    }
+
+    /// Bir önceki oturumu aynı kategori, hedef ve ritimle hemen başlatır.
+    private func repeatLast(_ s: Session, topic: Topic) {
+        UserDefaults.standard.set(topic.id, forKey: "lastTopic")
+        UserDefaults.standard.set(s.workMinutes, forKey: "rhythmWork")
+        Focus.shared.start(topic: topic, goal: s.goal, todoIDs: [], newTodos: [], work: s.workMinutes, rest: s.restMinutes)
+        close()
     }
 
     private func begin() {

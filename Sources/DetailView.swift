@@ -153,7 +153,9 @@ struct NotesEditor: View {
     var body: some View {
         ZStack(alignment: .topLeading) {
             if text.isEmpty {
-                Text(T("Aklına geleni yaz…", "Write down whatever comes to mind…")).font(.system(size: 13)).foregroundStyle(Ink.faint).padding(.top, 8).padding(.leading, 5)
+                // Metin görünümü yazıyı en üstten ve 5 nokta içeriden başlatır; yer tutucu imleçle aynı yere oturur.
+                Text(T("Aklına geleni yaz…", "Write down whatever comes to mind…")).font(.system(size: 13)).foregroundStyle(Ink.faint).padding(.leading, 5)
+                    .allowsHitTesting(false)
             }
             TextEditor(text: $text)
                 .font(.system(size: 13))
@@ -167,36 +169,38 @@ struct NotesEditor: View {
     }
 }
 
-/// Günün yatay şeridi (08–20): biten oturumlar, şimdiki oturum ve şu an.
+/// Günün yatay şeridi: biten oturumlar, şimdiki oturum ve şu an. 08–20'yi gösterir;
+/// gün daha erken başlar ya da geç uzarsa çizelge o saatlere genişler.
 struct DayStrip: View {
     let sessions: [Session]
     @ObservedObject private var focus = Focus.shared
 
     var body: some View {
-        let start = Calendar.current.startOfDay(for: Date())
-        let from = 8.0, to = 20.0
-        let x = { (d: Date) -> Double in (hourOfDay(d) - from) / (to - from) }
+        let hours = sessions.flatMap { [hourOfDay($0.start), hourOfDay($0.end ?? $0.start)] } + [hourOfDay(Date())]
+        let from = min(8, floor(hours.min() ?? 8))
+        let span = ceil((max(20, ceil(hours.max() ?? 20)) - from) / 4) * 4   // dört eşit aralık, tam saatlerde
+        let x = { (d: Date) -> Double in (hourOfDay(d) - from) / span }
+        let ticks = (0...4).map { String(format: "%02d", Int(from + span / 4 * Double($0)) % 24) }
         VStack(spacing: 6) {
             GeometryReader { g in
                 ZStack(alignment: .leading) {
                     RoundedRectangle(cornerRadius: 7).fill(Color.white.opacity(0.05))
-                    ForEach(sessions) { s in
-                        let a = x(s.start), b = x(s.end ?? s.start)
-                        RoundedRectangle(cornerRadius: 4).fill(Color.white.opacity(0.45))
-                            .frame(width: max(3, g.size.width * (b - a)), height: 16).offset(x: g.size.width * a)
-                    }
-                    if let s = focus.session {
-                        let a = x(s.start), b = x(Date())
-                        RoundedRectangle(cornerRadius: 4).fill(Color.white.opacity(0.9))
-                            .frame(width: max(3, g.size.width * (b - a)), height: 16).offset(x: g.size.width * a)
-                    }
-                    Rectangle().fill(Color.white).frame(width: 1.5).offset(x: g.size.width * x(Date()))
+                    ForEach(sessions) { s in bar(x(s.start), x(s.end ?? s.start), width: g.size.width, opacity: 0.45) }
+                    if let s = focus.session { bar(x(s.start), x(Date()), width: g.size.width, opacity: 0.9) }
+                    Rectangle().fill(Color.white).frame(width: 1.5).offset(x: (g.size.width * x(Date())).rounded())
                 }
             }
             .frame(height: 26)
-            HStack { ForEach(["08", "11", "14", "17", "20"], id: \.self) { Text($0); if $0 != "20" { Spacer() } } }
+            HStack { ForEach(Array(ticks.enumerated()), id: \.offset) { i, t in Text(t); if i < 4 { Spacer() } } }
                 .font(.system(size: 10)).foregroundStyle(Ink.faint).monospacedDigit()
         }
+    }
+
+    /// Süresiyle orantılı çubuk; tam noktaya oturur ki kenarı bulanmasın, ardışık oturumlar arasında bir nokta boşluk kalır.
+    private func bar(_ a: Double, _ b: Double, width: CGFloat, opacity: Double) -> some View {
+        let x0 = (width * a).rounded(), x1 = (width * b).rounded()
+        return RoundedRectangle(cornerRadius: 2).fill(Color.white.opacity(opacity))
+            .frame(width: max(2, x1 - x0 - 1), height: 16).offset(x: x0)
     }
 }
 

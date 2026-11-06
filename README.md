@@ -49,10 +49,11 @@ Everything stays on your Mac in a local SQLite file. There is no account, no syn
 
 Start a session from the menu bar, from the panel, or from anywhere with **⌥⌘N**.
 
+- **Repeat last:** the button in the top right starts your previous session again with the same category, goal and rhythm.
 - **Category:** each category has its own colour and, optionally, an emoji or one of 100 built-in icons.
 - **Goal:** answer *What are you focusing on?* in a few words.
 - **Tasks:** tick tasks from today's list, or write new ones with a title and optional details. New tasks are added to today's list too.
-- **This week's list:** if you plan your week in a Markdown file, for example a weekly note in Obsidian, Houra reads its open tasks and lets you pick them too. Tasks of the selected category come first, and subtasks sit indented under their parent. Turn it on and set the path in *Settings › Weekly tasks*; it can contain the year, week and month (`{YYYY}`, `{WW}`, `{MM}`) and `*` for any folder, so it follows you into next week by itself. The file is only read, never written.
+- **This week's list (Obsidian):** if you plan your week in a Markdown file, for example a weekly note in Obsidian, Houra reads its open tasks and lets you pick them too. Tasks of the selected category come first, and subtasks sit indented under their parent. Turn it on and set the path in *Settings › Weekly tasks*; it can contain the year, week and month (`{YYYY}`, `{WW}`, `{MM}`) and `*` for any folder, so it follows you into next week by itself. The file is only read, never written.
 - **Rhythm:** two fixed rhythms, **25 + 5** and **50 + 10**. No fiddling with minutes. Or **free**: the clock counts up, and every 50 minutes the screen pulses and the widget asks if you want a break. Saying no is fine.
 
 During the session every task has three states, cycled with a click:
@@ -146,7 +147,7 @@ This is the only place in Houra that uses colour, so your categories stand out.
   <img src="assets/panel-sessions.png" width="49%" alt="Sessions page">
 </p>
 
-- **Today:** today's focus, breaks, tasks and emergency exits; today's to-do list; a vertical timeline of your sessions; and, if weekly tasks are on, a *This week* card with the open tasks of your weekly note grouped by project. Click one to start a session with it.
+- **Today:** today's focus, breaks, tasks and emergency exits; today's to-do list; a vertical timeline of your sessions; and, if weekly tasks are on, a *This week in Obsidian* card with the open tasks of your weekly note grouped by project. Click one to start a session with it, or use the arrow next to it to copy it to today's list; the weekly note itself stays untouched.
 - **Sessions:** your history grouped by day, filterable by category or *with notes*. Click a session to see its tasks and notes.
 
 <p align="center">

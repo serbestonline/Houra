@@ -38,7 +38,7 @@ enum Ink {
     static let line = Color.white.opacity(0.09)
     static let card = Color.white.opacity(0.04)
     static let glass = Color(red: 0.063, green: 0.063, blue: 0.07).opacity(0.86)
-    static let glassStrong = Color(red: 0.047, green: 0.047, blue: 0.05).opacity(0.95)
+    static let glassStrong = Color(red: 0.047, green: 0.047, blue: 0.05)   // tam örtücü: arkadaki pencerenin yazısı okunmasın
     static let background = LinearGradient(colors: [Color(white: 0.067), Color(white: 0.024)], startPoint: .top, endPoint: .bottom)
     /// İstatistikte filtre yokken kullanılan vurgu.
     static let statsAccent = Color(red: 0.24, green: 0.55, blue: 1)

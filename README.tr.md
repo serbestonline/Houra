@@ -36,10 +36,11 @@ Her şey Mac'inde, yerel bir SQLite dosyasında durur. Hesap, senkronizasyon ya 
 
 Oturumu menü çubuğundan, panelden ya da her yerden **⌥⌘N** ile başlatırsın.
 
+- **Öncekini tekrarla:** sağ üstteki düğme bir önceki oturumu aynı kategori, hedef ve ritimle yeniden başlatır.
 - **Kategori:** her kategorinin bir rengi ve istersen bir emojisi ya da 100 hazır ikondan biri vardır.
 - **Hedef:** *Neye odaklanıyorsun?* sorusuna birkaç kelimeyle cevap verirsin.
 - **Görevler:** bugünün listesinden seçersin ya da başlık ve isteğe bağlı açıklamayla yenisini yazarsın. Yeni görevler bugünün listesine de eklenir.
-- **Haftanın listesi:** haftanı bir Markdown dosyasında, örneğin Obsidian'daki haftalık notunda planlıyorsan Houra oradaki açık görevleri okur, onlardan da seçebilirsin. Seçili kategorinin görevleri üstte gelir, alt görevler üst görevlerinin altında girintili durur. *Ayarlar › Haftalık görevler*'de açıp yolu verirsin; yıl, hafta ve ay (`{YYYY}`, `{WW}`, `{MM}`) ile herhangi bir klasör için `*` içerebilir, böylece hafta dönünce kendiliğinden yeni dosyaya geçer. Dosya yalnız okunur, hiçbir şey yazılmaz.
+- **Haftanın listesi (Obsidian):** haftanı bir Markdown dosyasında, örneğin Obsidian'daki haftalık notunda planlıyorsan Houra oradaki açık görevleri okur, onlardan da seçebilirsin. Seçili kategorinin görevleri üstte gelir, alt görevler üst görevlerinin altında girintili durur. *Ayarlar › Haftalık görevler*'de açıp yolu verirsin; yıl, hafta ve ay (`{YYYY}`, `{WW}`, `{MM}`) ile herhangi bir klasör için `*` içerebilir, böylece hafta dönünce kendiliğinden yeni dosyaya geçer. Dosya yalnız okunur, hiçbir şey yazılmaz.
 - **Ritim:** iki sabit ritim: **25 + 5** ve **50 + 10**. Ya da **serbest**: sayaç ileri akar, her 50 dakikada ekran yanıp söner ve widget mola isteyip istemediğini sorar; mola isteğe bağlıdır.
 
 Oturum sırasında her görevin üç durumu vardır, tıklayarak değişir:
@@ -133,7 +134,7 @@ Houra'da rengin kullanıldığı tek yer burası; kategoriler böylece öne çı
   <img src="assets/panel-sessions.png" width="49%" alt="Oturumlar sayfası">
 </p>
 
-- **Bugün:** bugünün odağı, molaları, görevleri ve acil durumları; günün yapılacaklar listesi; oturumların dikey çizelgesi; haftalık görevler açıksa haftalık notundaki açık görevleri proje proje gösteren *Bu hafta* kartı. Bir göreve tıklayınca o görevle oturum açılır.
+- **Bugün:** bugünün odağı, molaları, görevleri ve acil durumları; günün yapılacaklar listesi; oturumların dikey çizelgesi; haftalık görevler açıksa haftalık notundaki açık görevleri proje proje gösteren *Bu hafta Obsidian'da* kartı. Bir göreve tıklayınca o görevle oturum açılır, yanındaki okla da bugünün listesine kopyalanır; haftalık not hiç değişmez.
 - **Oturumlar:** gün gün geçmiş; kategoriye ya da notlu oturumlara göre süzülür. Oturuma tıklayınca görevleri ve notları açılır.
 
 <p align="center">

@@ -265,13 +265,14 @@ private struct WeekCard: View {
     let topics: [Topic]
     @State private var tasks: [WeeklyTask] = []
     @State private var fileName = ""
+    @State private var todayTitles: Set<String> = []
     private let refresh = Timer.publish(every: 20, on: .main, in: .common).autoconnect()   // Obsidian'daki değişiklikler gelsin
 
     var body: some View {
         Card {
             VStack(alignment: .leading, spacing: 14) {
                 HStack {
-                    Eyebrow(T("Bu hafta", "This week"))
+                    Eyebrow(T("Bu hafta Obsidian'da", "This week in Obsidian"))
                     Spacer()
                     Text(fileName.isEmpty ? T("haftalık not bulunamadı", "weekly note not found") : "\(fileName) · \(T("\(tasks.count) açık görev", "\(tasks.count) open tasks"))")
                         .font(.system(size: 12)).foregroundStyle(Ink.muted)
@@ -290,7 +291,7 @@ private struct WeekCard: View {
                                     Text(task.detail).font(.system(size: 12)).foregroundStyle(Ink.faint).lineLimit(1)
                                         .padding(.leading, 26).padding(.top, 4)
                                 }
-                                WeekTaskRow(task: task).padding(.leading, task.depth > 0 ? 20 : 0)
+                                WeekTaskRow(task: task, inToday: todayTitles.contains(task.title)).padding(.leading, task.depth > 0 ? 20 : 0)
                             }
                         }
                         .frame(maxWidth: .infinity, alignment: .topLeading)
@@ -300,7 +301,10 @@ private struct WeekCard: View {
         }
         .onAppear(perform: load)
         .onReceive(refresh) { _ in load() }
+        .onReceive(NotificationCenter.default.publisher(for: .storeChanged)) { _ in loadToday() }
     }
+
+    private func loadToday() { todayTitles = Set(Store.shared.todos(day: dayKey(Date())).map(\.title)) }
 
     private var groups: [(heading: String, topic: Topic?, tasks: [WeeklyTask])] {
         var order: [String] = [], byHeading: [String: [WeeklyTask]] = [:]
@@ -315,11 +319,13 @@ private struct WeekCard: View {
     private func load() {
         tasks = WeeklyList.load(topics: topics)
         fileName = WeeklyList.file()?.deletingPathExtension().lastPathComponent ?? ""
+        loadToday()
     }
 }
 
 private struct WeekTaskRow: View {
     let task: WeeklyTask
+    let inToday: Bool
     @State private var hovering = false
     var body: some View {
         Button { NewSessionController.shared.show(preselect: task) } label: {
@@ -333,6 +339,7 @@ private struct WeekTaskRow: View {
                     }
                 }
                 Spacer(minLength: 4)
+                Color.clear.frame(width: 18, height: 1)   // bugüne al düğmesinin yeri
                 Image(systemName: "play.fill").font(.system(size: 9)).foregroundStyle(Ink.muted).opacity(hovering ? 1 : 0).padding(.top, 4)
             }
             .padding(.vertical, 5).padding(.horizontal, 6)
@@ -340,6 +347,15 @@ private struct WeekTaskRow: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .overlay(alignment: .topTrailing) {
+            // Görev bugünün listesine kopyalanır; Obsidian'daki haftalık not yalnız okunur, değişmez.
+            Button { Store.shared.addTodo(day: dayKey(Date()), title: task.title, detail: task.detail) } label: {
+                Image(systemName: inToday ? "checkmark" : "arrow.down.to.line").font(.system(size: 10, weight: .semibold)).frame(width: 18, height: 18)
+            }
+            .buttonStyle(.plain).foregroundStyle(inToday ? Ink.faint : Ink.muted).disabled(inToday)
+            .opacity(hovering || inToday ? 1 : 0).padding(.top, 5).padding(.trailing, 22)
+            .help(inToday ? T("Bugünün listesinde", "On today's list") : T("Bugünün listesine al", "Add to today's list"))
+        }
         .onHover { hovering = $0 }
         .help(T("Bu görevle oturum başlat", "Start a session with this task"))
     }
