@@ -5,7 +5,7 @@
 <h1 align="center">Houra</h1>
 
 <p align="center">
-  <b>Focus, step away when necessary, stay refreshed.</b><br>
+  <b>Focus. Step away when you need to. Stay fresh.</b><br>
   Plan the session, keep the time in sight, and step away from the screen when the break comes.
 </p>
 
