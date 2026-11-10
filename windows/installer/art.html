@@ -1,0 +1,36 @@
+<!doctype html>
+<!-- Kurulum penceresinin görseli. scripts/make-installer.js bu sayfayı her dil, hal ve ekran ölçeği için çizip
+     BMP'ye çevirir; kurulum penceresi yalnız görseli gösterir, tıklanacak yerler installer.nsi içinde aynı ölçülerle durur. -->
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; width: 560px; height: 360px; overflow: hidden; }
+  body { position: relative; font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; color: #f5f5f5; -webkit-font-smoothing: antialiased;
+    background: radial-gradient(420px 300px at 22% 12%, rgba(255,255,255,.13), transparent 70%),
+      radial-gradient(380px 300px at 88% 96%, rgba(255,255,255,.07), transparent 70%), #0b0b0c;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.09); }
+  .abs { position: absolute; left: 0; right: 0; text-align: center; }
+  img { position: absolute; left: 242px; top: 62px; width: 76px; height: 76px; border-radius: 18px; box-shadow: 0 10px 30px rgba(0,0,0,.6); }
+  h1 { top: 152px; margin: 0; font-size: 40px; font-weight: 200; letter-spacing: -1px; line-height: 54px; }
+  .tag { top: 212px; font-size: 13.5px; color: rgba(255,255,255,.55); }
+  .x { position: absolute; left: 518px; top: 14px; width: 26px; height: 26px; line-height: 26px; text-align: center; color: rgba(255,255,255,.5); font-size: 15px; }
+  .btn { position: absolute; left: 170px; top: 264px; width: 220px; height: 40px; line-height: 40px; border-radius: 12px; background: #f5f5f5; color: #000; font-size: 13.5px; font-weight: 500; text-align: center; }
+  .small { top: 318px; font-size: 11px; color: rgba(255,255,255,.32); }
+  .status { position: absolute; left: 40px; top: 284px; font-size: 12.5px; }
+  .track { position: absolute; left: 40px; top: 313px; width: 480px; height: 3px; background: rgba(255,255,255,.1); }
+</style>
+<body><script>
+  const q = new URLSearchParams(location.search), tr = q.get('lang') === 'tr', state = q.get('state'), T = (a, b) => (tr ? a : b);
+  const add = (cls, text) => { const el = document.createElement('div'); el.className = cls; el.textContent = text; document.body.append(el); };
+  const icon = new Image(); icon.src = q.get('icon'); document.body.append(icon);
+  const title = document.createElement('h1'); title.className = 'abs'; document.body.append(title);
+  title.textContent = state === 'done' ? T('Houra hazır.', 'Houra is ready.') : 'Houra';
+  add('abs tag', state === 'done' ? T('Saatin yanındaki tepside durur. Her yerden: Ctrl + Alt + N', 'It lives in the tray next to the clock. From anywhere: Ctrl + Alt + N')
+    : T('Odaklan. Gerektiğinde uzaklaş. Zinde kal.', 'Focus. Step away when you need to. Stay fresh.'));
+  if (state === 'installing') { add('status', T('Kuruluyor…', 'Installing…')); add('track', ''); }
+  else {
+    add('x', '✕');
+    add('btn', state === 'done' ? T("Houra'yı aç", 'Open Houra') : T('Kur', 'Install'));
+    add('abs small', state === 'done' ? T('Kaldırmak için: Ayarlar › Uygulamalar › Houra', 'To remove: Settings › Apps › Houra')
+      : T(`Sürüm ${q.get('version')} · yalnız senin kullanıcına kurulur, yönetici izni istemez`, `Version ${q.get('version')} · installs for your user only, no admin rights needed`));
+  }
+</script></body>

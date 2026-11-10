@@ -1,0 +1,29 @@
+{
+  "name": "houra",
+  "productName": "Houra",
+  "version": "1.3.0",
+  "description": "Houra for Windows: a focus timer that lives in the system tray.",
+  "author": "Serbest",
+  "license": "SEE LICENSE IN ../LICENSE",
+  "private": true,
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test",
+    "dist": "electron-builder --win --x64 --publish never && node scripts/make-installer.js"
+  },
+  "devDependencies": {
+    "electron": "^45.2.3",
+    "electron-builder": "^26.18.0"
+  },
+  "build": {
+    "appId": "com.serbest.houra",
+    "productName": "Houra",
+    "copyright": "Copyright (c) 2026 Serbest. All rights reserved.",
+    "files": ["src/**/*", "package.json"],
+    "extraResources": [{ "from": "../Stretches", "to": "Stretches" }],
+    "directories": { "output": "dist" },
+    "win": { "target": "nsis", "icon": "../assets/icon.png" },
+    "nsis": { "oneClick": true, "perMachine": false, "artifactName": "Houra-Core-${version}.exe" }
+  }
+}

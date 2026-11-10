@@ -1,0 +1,45 @@
+# Houra'nın Windows kurulum dosyasını GitHub'ın Windows sunucusunda derler.
+# windows/ klasörü değişince kendiliğinden çalışır; çıktı "Houra-Windows" adıyla indirilir.
+# Elle çalıştırırken (Actions > Windows > Run workflow) bir sürüm etiketi verilirse dosya o sürümün sayfasına da eklenir.
+name: Windows
+
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: Kurulum dosyasının ekleneceği sürüm etiketi (örneğin v1.3); boşsa eklenmez
+        required: false
+  push:
+    paths: ['windows/**', 'Stretches/**', '.github/workflows/windows.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: windows
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: windows/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Houra-Windows
+          path: windows/dist/*.exe
+          if-no-files-found: error
+      - name: Sürüm sayfasına ekle
+        if: inputs.release != ''
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.release }}
+        run: gh release upload "$TAG" dist/Houra-Setup-*.exe --clobber
