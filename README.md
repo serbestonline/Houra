@@ -189,6 +189,10 @@ Requires **macOS 13 or later**. Runs natively on Apple Silicon and Intel Macs.
 2. Open it and click **Install**. It installs for your user only and does not ask for administrator rights.
 3. Click **Open Houra**. It lives in the system tray next to the clock; if you don't see the icon, look behind the `^` arrow.
 
+<p align="center">
+  <img src="assets/windows-setup.png" width="760" alt="Houra's setup window on Windows: start, installing and ready">
+</p>
+
 Requires **Windows 10 or 11** (64-bit). Start a new session from anywhere with <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>N</kbd>.
 
 > **First launch:** the installer is not code-signed, so Windows may show a blue "Windows protected your PC" window. Click **More info**, then **Run anyway**.

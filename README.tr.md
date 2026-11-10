@@ -176,6 +176,10 @@ Menü çubuğu simgesi iç içe iki kare. Oturum sırasında yalnız dış kare 
 2. Aç ve **Kur**'a bas. Yalnız senin kullanıcına kurulur, yönetici izni istemez.
 3. **Houra'yı aç**'a bas. Saatin yanındaki sistem tepsisinde durur; simgeyi görmüyorsan `^` okunun arkasına bak.
 
+<p align="center">
+  <img src="assets/windows-setup.png" width="760" alt="Houra'nın Windows'taki kurulum penceresi: açılış, kurulurken ve hazır">
+</p>
+
 **Windows 10 ya da 11** (64 bit) gerekir. Her yerden yeni oturum: <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>N</kbd>.
 
 > **İlk açılış:** Kurulum dosyası imzalı olmadığı için Windows mavi bir "Windows kişisel bilgisayarınızı korudu" penceresi gösterebilir. **Ek bilgi**'ye, sonra **Yine de çalıştır**'a bas.
