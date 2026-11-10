@@ -14,6 +14,14 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/serbestonline/Houra/releases/latest"><img src="assets/download-macos.svg" width="220" alt="Download Houra for macOS"></a>
+  &nbsp;
+  <a href="https://github.com/serbestonline/Houra/releases/latest"><img src="assets/download-windows.svg" width="220" alt="Download Houra for Windows"></a>
+  <br>
+  <sub>Pick your system; both open the latest release, where the installer is waiting.</sub>
+</p>
+
+<p align="center">
   <img src="assets/flow.gif" width="880" alt="Starting a session, checking off a task and reaching the full-screen break">
 </p>
 
@@ -26,7 +34,7 @@ Houra is a focus timer built around four ideas:
 3. **Really take the break.** When the time is up, a full-screen break covers every display. It only lets you back in early through a deliberate, press-and-hold *Emergency* button.
 4. **Move while you're away.** The break screen, and a window you can open any time, guide you through 23 stretches for the lower back, neck, shoulders and wrists, each shown as a looping animation.
 
-Everything stays on your Mac in a local SQLite file. There is no account, no sync and no tracking.
+Everything stays on your computer in a local SQLite file. There is no account, no sync and no tracking.
 
 *Houra* comes from *hour*. The interface is available in English and Turkish.
 
@@ -164,7 +172,7 @@ The menu bar icon is a square inside a square. During a session only the outer s
 
 ## Installation
 
-### Download
+### macOS
 
 1. Download **`Houra-<version>.dmg`** from the [latest release](https://github.com/serbestonline/Houra/releases/latest).
 2. Open it and drag **Houra** onto **Applications**.
@@ -175,7 +183,21 @@ Requires **macOS 13 or later**. Runs natively on Apple Silicon and Intel Macs.
 > **First launch:** Houra is not notarized by Apple, so the first time you open it macOS says it couldn't verify the app. Go to **System Settings › Privacy & Security**, scroll down and click **Open Anyway**. You only need to do this once.
 > Or remove the quarantine flag in Terminal: `xattr -dr com.apple.quarantine /Applications/Houra.app`
 
+### Windows
+
+1. Download **`Houra-Setup-<version>.exe`** from the [latest release](https://github.com/serbestonline/Houra/releases/latest).
+2. Open it and click **Install**. It installs for your user only and does not ask for administrator rights.
+3. Click **Open Houra**. It lives in the system tray next to the clock; if you don't see the icon, look behind the `^` arrow.
+
+Requires **Windows 10 or 11** (64-bit). Start a new session from anywhere with <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>N</kbd>.
+
+> **First launch:** the installer is not code-signed, so Windows may show a blue "Windows protected your PC" window. Click **More info**, then **Run anyway**.
+
+The Windows version is a separate app in [`windows/`](windows) that keeps the same features and the same local database format, so a `houra.sqlite` file can be moved between the two.
+
 ### Build from source
+
+The steps below build the macOS app; for Windows see [`windows/README.md`](windows/README.md).
 
 Requirements: macOS 13 or later and the Xcode Command Line Tools. There is no Xcode project and no third-party dependency.
 
@@ -214,7 +236,7 @@ All categories, tasks, sessions and notes are stored in a single SQLite file:
 ~/Library/Application Support/Houra/houra.sqlite
 ```
 
-Nothing leaves your Mac. From *Settings* you can reveal the file in Finder or export every session as CSV. If you quit Houra in the middle of a session, it is closed with its planned length the next time Houra starts.
+Nothing leaves your computer. On Windows the same file lives in `%APPDATA%\Houra`. From *Settings* you can reveal the file in Finder or export every session as CSV. If you quit Houra in the middle of a session, it is closed with its planned length the next time Houra starts.
 
 ## Building and contributing
 

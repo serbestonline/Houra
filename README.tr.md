@@ -5,12 +5,20 @@
 <h1 align="center">Houra</h1>
 
 <p align="center">
-  <b>macOS için sakin, siyah-beyaz bir odak zamanlayıcısı.</b><br>
+  <b>Odaklan. Gerektiğinde uzaklaş. Zinde kal.</b><br>
   Oturumu planla, süreyi göz önünde tut, mola gelince ekrandan uzaklaş.
 </p>
 
 <p align="center">
   <a href="README.md">English</a> · <b>Türkçe</b>
+</p>
+
+<p align="center">
+  <a href="https://github.com/serbestonline/Houra/releases/latest"><img src="assets/download-macos.svg" width="220" alt="Houra'yı macOS için indir"></a>
+  &nbsp;
+  <a href="https://github.com/serbestonline/Houra/releases/latest"><img src="assets/download-windows.svg" width="220" alt="Houra'yı Windows için indir"></a>
+  <br>
+  <sub>Sistemini seç; ikisi de kurulum dosyasının durduğu son sürüm sayfasını açar.</sub>
 </p>
 
 <p align="center">
@@ -26,7 +34,7 @@ Houra dört fikir üzerine kurulu:
 3. **Molayı gerçekten ver.** Süre dolunca bütün ekranları tam ekran bir mola kaplar. Erken dönmenin tek yolu, bilerek basılı tutulan *Acil durum* düğmesidir.
 4. **Uzaklaşınca hareket et.** Mola ekranı ve istediğin zaman açabildiğin bir pencere, bel, boyun, omuz ve bilek için 23 esneme hareketini döngüyle oynayan animasyonlarla gösterir.
 
-Her şey Mac'inde, yerel bir SQLite dosyasında durur. Hesap, senkronizasyon ya da izleme yoktur.
+Her şey bilgisayarında, yerel bir SQLite dosyasında durur. Hesap, senkronizasyon ya da izleme yoktur.
 
 *Houra*, İngilizce *hour* (saat) kelimesinden gelir. Arayüz Türkçe ve İngilizcedir.
 
@@ -151,7 +159,7 @@ Menü çubuğu simgesi iç içe iki kare. Oturum sırasında yalnız dış kare 
 
 ## Kurulum
 
-### İndirerek
+### macOS
 
 1. [Son sürümden](https://github.com/serbestonline/Houra/releases/latest) **`Houra-<sürüm>.dmg`** dosyasını indir.
 2. Aç ve **Houra**'yı **Applications** klasörüne sürükle.
@@ -162,7 +170,21 @@ Menü çubuğu simgesi iç içe iki kare. Oturum sırasında yalnız dış kare 
 > **İlk açılış:** Houra Apple tarafından onaylanmadığı (notarize edilmediği) için macOS ilk açılışta uygulamayı doğrulayamadığını söyler. **Sistem Ayarları › Gizlilik ve Güvenlik**'e git, aşağı kaydır ve **Yine de Aç**'a tıkla. Bunu bir kez yapman yeter.
 > Ya da Terminal'de karantina işaretini kaldır: `xattr -dr com.apple.quarantine /Applications/Houra.app`
 
+### Windows
+
+1. [Son sürümden](https://github.com/serbestonline/Houra/releases/latest) **`Houra-Setup-<sürüm>.exe`** dosyasını indir.
+2. Aç ve **Kur**'a bas. Yalnız senin kullanıcına kurulur, yönetici izni istemez.
+3. **Houra'yı aç**'a bas. Saatin yanındaki sistem tepsisinde durur; simgeyi görmüyorsan `^` okunun arkasına bak.
+
+**Windows 10 ya da 11** (64 bit) gerekir. Her yerden yeni oturum: <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>N</kbd>.
+
+> **İlk açılış:** Kurulum dosyası imzalı olmadığı için Windows mavi bir "Windows kişisel bilgisayarınızı korudu" penceresi gösterebilir. **Ek bilgi**'ye, sonra **Yine de çalıştır**'a bas.
+
+Windows sürümü [`windows/`](windows) klasöründe duran ayrı bir uygulamadır; özellikleri ve yerel veritabanının biçimi aynıdır, yani `houra.sqlite` dosyası ikisi arasında taşınabilir.
+
 ### Kaynaktan derleme
+
+Aşağıdaki adımlar macOS uygulamasını derler; Windows için [`windows/README.md`](windows/README.md) dosyasına bak.
 
 Gerekenler: macOS 13 veya üstü ve Xcode Command Line Tools. Xcode projesi ya da dış bağımlılık yoktur.
 
@@ -201,7 +223,7 @@ Kategoriler, görevler, oturumlar ve notlar tek bir SQLite dosyasında durur:
 ~/Library/Application Support/Houra/houra.sqlite
 ```
 
-Hiçbir şey Mac'inden dışarı çıkmaz. *Ayarlar*'dan dosyayı Finder'da gösterebilir ya da bütün oturumları CSV olarak dışa aktarabilirsin. Oturum ortasında Houra'yı kapatırsan oturum, uygulama bir sonraki açılışında planlanan süresiyle kapatılır.
+Hiçbir şey bilgisayarından dışarı çıkmaz. Windows'ta aynı dosya `%APPDATA%\Houra` klasöründedir. *Ayarlar*'dan dosyayı Finder'da gösterebilir ya da bütün oturumları CSV olarak dışa aktarabilirsin. Oturum ortasında Houra'yı kapatırsan oturum, uygulama bir sonraki açılışında planlanan süresiyle kapatılır.
 
 ## Geliştirme
 
